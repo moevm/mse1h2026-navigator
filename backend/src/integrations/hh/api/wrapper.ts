@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosHeaders } from 'axios';
 import 'dotenv/config';
-import type { VacancyDetail, VacancySearchResponse, VacancySearchParams } from './types';
+import type { VacancyDetail, VacancySearchResponse, VacancySearchParams } from '../types';
 
 /**
  * Класс для работы с API HeadHunter

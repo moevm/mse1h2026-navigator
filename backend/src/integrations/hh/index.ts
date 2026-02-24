@@ -1,2 +1,2 @@
 export { HHClient } from './HHClient';
-export type { VacancySearchParams, Vacancy, VacancyDetail } from './api/types';
+export type { VacancySearchParams, Vacancy, VacancyDetail } from './types';
