@@ -17,7 +17,7 @@ export class HHApiWrapper {
     this.client.interceptors.request.use(async (config) => {
 		config.headers = new AxiosHeaders({
 			...config.headers,
-			'HH-User-Agent': process.env.USER_AGENT || '',
+			'HH-User-Agent': process.env.HH_USER_AGENT || '',
 		});
 		return config;
 	}, (error) => {
