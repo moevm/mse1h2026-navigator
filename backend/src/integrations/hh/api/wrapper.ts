@@ -14,7 +14,6 @@ export class HHApiWrapper {
       timeout: this.timeout,
     });
 
-    // Добавляем интерсепторы для авторизации
     this.client.interceptors.request.use(async (config) => {
 		config.headers = new AxiosHeaders({
 			...config.headers,
