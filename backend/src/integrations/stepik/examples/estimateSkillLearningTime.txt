@@ -1,0 +1,6 @@
+{"avgHours":6,"minHours":1,"maxHours":11,"coursesAnalyzed":7} - питон
+{"avgHours":33,"minHours":2,"maxHours":151,"coursesAnalyzed":5} - JavaScript
+{"avgHours":21,"minHours":2,"maxHours":151,"coursesAnalyzed":9} - Java
+{"avgHours":3,"minHours":1,"maxHours":5,"coursesAnalyzed":9} - HTML
+{"avgHours":6,"minHours":1,"maxHours":19,"coursesAnalyzed":6} - CSS
+{"avgHours":34,"minHours":34,"maxHours":34,"coursesAnalyzed":1} - nginx
