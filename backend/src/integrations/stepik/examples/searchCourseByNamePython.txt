@@ -1,0 +1,166 @@
+{
+  courses: [
+    {
+      id: 276059,
+      summary: 'Практический курс по стандарту оформления кода PEP-8.\n' +
+        'Вы научитесь писать чистый, читаемый и профессиональный Python-код, соответствующий требованиям индустрии.\n' +
+        '\n' +
+        'Минимум теории — максимум практики и реальных примеров.',
+      workload: '3-4 часа',
+      cover: 'https://cdn.stepik.net/media/cache/images/courses/276059/cover_HsP5qmS/8d32f11a99f86fb3ecdad49f29e93715.jpg',
+      intro: '',
+      course_format: '',
+      target_audience: 'Начинающие разработчики Python\n' +
+        'Студенты технических направлений\n' +
+        'Те, кто готовится к стажировке или первому собеседованию\n' +
+        'Авторы учебных проектов, желающие улучшить качество кода\n' +
+        'Самоучки, которые хотят писать «как в индустрии»\n' +
+        '\n' +
+        'Если вы уже знаете базовый синтаксис Python, но хотите писать аккуратный и профессиональный код — этот курс для вас.',
+      certificate_footer: null,
+      certificate_cover_org: 'https://cdn.stepik.net/media/courses/276059/certificate_cover_org_NB7BGiA.png',
+      is_certificate_issued: false,
+      is_certificate_auto_issued: true,
+      certificate_regular_threshold: 10,
+      certificate_distinction_threshold: 12,
+      instructors: [Array],
+      certificate: '',
+      requirements: '<p>Базовые знания Python (переменные, условия, циклы, функции)<br>\n' +
+        'Умение запускать Python-код<br>\n' +
+        'Понимание структуры простого Python-файла<br>\n' +
+        'Желательно: установленный Python 3.8+<br>\n' +
+        'Желательно: базовое знакомство с IDE (VS Code, PyCharm или аналог)</p>',
+      description: '<p>PEP-8 — это официальный стандарт оформления кода Python. Несмотря на простоту правил, именно стиль кода часто становится причиной замечаний на стажировках, собеседованиях и в реальной работе.</p>\n' +
+        '\n' +
+        '<p>Этот курс поможет вам системно разобраться в требованиях PEP-8 и научиться применять их на практике.</p>\n' +
+        '\n' +
+        '<p>Внутри курса вас ждут:</p>\n' +
+        '\n' +
+        '<p>• короткие теоретические уроки без «воды»<br>\n' +
+        '• примеры плохого и хорошего кода<br>\n' +
+        '• практические задания на исправление стиля<br>\n' +
+        '• разбор типичных ошибок начинающих разработчиков<br>\n' +
+        '• знакомство с профессиональными инструментами проверки кода</p>\n' +
+        '\n' +
+        '<p>Курс построен так, чтобы вы не просто запомнили правила, а начали автоматически писать аккуратный, читаемый и профессиональный Python-код.</p>',
+      sections: [Array],
+      total_units: 33,
+      enrollment: null,
+      is_favorite: false,
+      actions: [Object],
+      progress: null,
+      first_lesson: 2241136,
+      first_unit: 2274609,
+      certificate_link: null,
+      certificate_regular_link: null,
+      certificate_distinction_link: null,
+      user_certificate: null,
+      referral_link: null,
+      schedule_link: null,
+      schedule_long_link: null,
+      first_deadline: null,
+      last_deadline: null,
+      subscriptions: [Array],
+      announcements: [],
+      is_contest: false,
+      is_self_paced: true,
+      is_adaptive: false,
+      is_idea_compatible: false,
+      is_in_wishlist: false,
+      last_step: '78-276059',
+      intro_video: null,
+      social_providers: [],
+      authors: [Array],
+      tags: [Array],
+      has_tutors: false,
+      is_enabled: true,
+      is_proctored: false,
+      proctor_url: null,
+      review_summary: 275231,
+      schedule_type: 'self_paced',
+      certificates_count: 0,
+      learners_count: 0,
+      lessons_count: 33,
+      quizzes_count: 11,
+      challenges_count: 0,
+      peer_reviews_count: 0,
+      instructor_reviews_count: 0,
+      videos_duration: 0,
+      time_to_complete: null,
+      is_popular: false,
+      is_processed_with_paddle: false,
+      is_unsuitable: false,
+      is_paid: true,
+      price: '500.00',
+      currency_code: 'RUB',
+      display_price: '500 ₽',
+      default_promo_code_name: null,
+      default_promo_code_price: null,
+      default_promo_code_discount: null,
+      default_promo_code_is_percent_discount: null,
+      default_promo_code_expire_date: null,
+      continue_url: '/course/276059/continue',
+      readiness: 1,
+      is_archived: false,
+      options: {},
+      price_tier: null,
+      position: 18,
+      is_censored: false,
+      difficulty: 'easy',
+      acquired_skills: [Array],
+      acquired_assets: [],
+      learning_format: '',
+      content_details: [],
+      issue: null,
+      course_type: 'basic_paid',
+      possible_type: null,
+      is_certificate_with_score: false,
+      preview_lesson: null,
+      preview_unit: null,
+      possible_currencies: [],
+      commission_basic: null,
+      commission_promo: null,
+      with_certificate: true,
+      child_courses: [],
+      child_courses_count: 0,
+      parent_courses: [],
+      became_published_at: '2026-02-22T07:53:53.954Z',
+      became_paid_at: '2026-02-22T07:53:53.954Z',
+      title_en: 'Introduction to PEP-8: Writing Python beautifully and correctly',
+      last_update_price_date: null,
+      owner: 305325951,
+      language: 'ru',
+      is_featured: false,
+      is_public: true,
+      canonical_url: 'https://stepik.org/course/276059/',
+      title: 'Введение в PEP-8: Пишем Python красиво и правильно',
+      slug: 'Введение-в-PEP-8-Пишем-Python-красиво-и-правильно-276059',
+      begin_date: null,
+      end_date: null,
+      soft_deadline: null,
+      hard_deadline: null,
+      grading_policy: 'no_deadlines',
+      begin_date_source: null,
+      end_date_source: null,
+      soft_deadline_source: null,
+      hard_deadline_source: null,
+      grading_policy_source: 'no_deadlines',
+      is_active: true,
+      create_date: '2026-02-22T05:20:24Z',
+      update_date: '2026-02-22T07:53:53Z',
+      learners_group: null,
+      testers_group: null,
+      moderators_group: null,
+      assistants_group: null,
+      teachers_group: null,
+      admins_group: null,
+      discussions_count: 0,
+      discussion_proxy: null,
+      discussion_threads: [],
+      lti_consumer_key: '',
+      lti_secret_key: '',
+      lti_private_profile: false
+    }
+  ],
+  meta: { page: 1, has_next: true, has_previous: false }
+}
