@@ -5,23 +5,10 @@ import { YandexUserInfo, YandexApiError, AuthResponse } from "./types";
 
 export const router = Router();
 
-/**
- * Хэширует идентификатор пользователя Яндекс с помощью SHA256
- * для предотвращения сопоставления пользователей Яндекса и нашего сервиса,
- * необходимо для того, чтобы не стать оператором ПД (персональных данных)
- * @param id - Yandex ID пользователя
- * @returns SHA256-хэш идентификатора
- */
 function hashId(id: string): string {
   return createHash("sha256").update(id).digest("hex");
 }
 
-/**
- * Формирует URL аватара пользователя Яндекс
- * @param avatarId - Идентификатор аватара
- * @param isAvatarEmpty - Флаг отсутствия аватара
- * @returns URL аватара или пустая строка
- */
 function buildAvatarUrl(avatarId: string, isAvatarEmpty: boolean): string {
   if (isAvatarEmpty) {
     return "";
@@ -29,18 +16,6 @@ function buildAvatarUrl(avatarId: string, isAvatarEmpty: boolean): string {
   return `https://avatars.yandex.net/get-yapic/${avatarId}/islands-200`;
 }
 
-/**
- * POST /auth
- *
- * Авторизация пользователя через Yandex OAuth.
- * Принимает OAuth токен, запрашивает данные пользователя у Яндекс,
- * хэширует ID и возвращает информацию о пользователе на фронтенд.
- *
- * Токен и данные пользователя не сохраняются на сервере.
- *
- * @body { oauthToken: string } - OAuth токен Яндекс
- * @returns {AuthResponse} - Данные пользователя с хэшированным ID
- */
 router.post("/", async (req: Request, res: Response): Promise<void> => {
   const { oauthToken } = req.body as { oauthToken?: string };
 
