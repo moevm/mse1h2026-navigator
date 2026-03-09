@@ -1,12 +1,13 @@
-import type { Node, Edge } from "@xyflow/react";
+import type { Edge } from "@xyflow/react";
 import type { Skill, MainSkill, SkillsRelation } from "@/entities/skill/types";
+import type { GraphNode } from "../types/nodes";
 
 export const mapSkillsToFlow = (
   mainSkill: MainSkill,
   skills: Skill[],
   relations: SkillsRelation[],
-): { nodes: Node[]; edges: Edge[] } => {
-  const nodes: Node[] = [
+): { nodes: GraphNode[]; edges: Edge[] } => {
+  const nodes: GraphNode[] = [
     {
       id: mainSkill.id,
       type: "main",
@@ -14,12 +15,15 @@ export const mapSkillsToFlow = (
       data: mainSkill,
     },
 
-    ...skills.map((skill) => ({
-      id: skill.id,
-      type: "basic",
-      position: { x: 0, y: 0 },
-      data: skill,
-    })),
+    ...skills.map(
+      (skill) =>
+        ({
+          id: skill.id,
+          type: "basic",
+          position: { x: 0, y: 0 },
+          data: skill,
+        }) as GraphNode,
+    ),
   ];
 
   const edges: Edge[] = relations.map((rel) => ({
