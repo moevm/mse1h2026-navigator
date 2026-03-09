@@ -4,6 +4,8 @@ import { applyNodeChanges } from "@xyflow/react";
 import { GraphProxy } from "../api/graphProxy";
 import type { Skill, MainSkill } from "@/entities/skill/types";
 import { mapSkillsToFlow } from "../lib/mapSkillsToFlow";
+import { layoutGraph } from "../lib/layoutGraph";
+import { resolveHandles } from "../lib/resolveHandles";
 
 export class GraphStore {
   private skills_: Skill[] = [];
@@ -45,7 +47,11 @@ export class GraphStore {
 
     const flow = mapSkillsToFlow(mainSkill, nodes, edges);
 
-    this.flowNodes_ = flow.nodes;
-    this.flowEdges_ = flow.edges;
+    const layouted = await layoutGraph(flow.nodes, flow.edges);
+
+    const edgesWithHandles = resolveHandles(layouted.nodes, layouted.edges);
+
+    this.flowNodes_ = layouted.nodes;
+    this.flowEdges_ = edgesWithHandles;
   };
 }
