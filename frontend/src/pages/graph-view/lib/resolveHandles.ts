@@ -1,4 +1,5 @@
 import type { Node, Edge } from "@xyflow/react";
+import { SourceHandleTypes, TargetHandleTypes } from "../config/handleTypes";
 
 function getHandleSide(source: Node, target: Node) {
   const dx = target.position.x - source.position.x;
@@ -7,23 +8,23 @@ function getHandleSide(source: Node, target: Node) {
   if (Math.abs(dx) > Math.abs(dy)) {
     return dx > 0
       ? {
-          sourceHandle: "right-source",
-          targetHandle: "left-target",
+          sourceHandle: SourceHandleTypes.RIGHT_SOURCE,
+          targetHandle: TargetHandleTypes.LEFT_TARGET,
         }
       : {
-          sourceHandle: "left-source",
-          targetHandle: "right-target",
+          sourceHandle: SourceHandleTypes.LEFT_SOURCE,
+          targetHandle: TargetHandleTypes.RIGHT_TARGET,
         };
   }
 
   return dy > 0
     ? {
-        sourceHandle: "bottom-source",
-        targetHandle: "top-target",
+        sourceHandle: SourceHandleTypes.BOTTOM_SOURCE,
+        targetHandle: TargetHandleTypes.TOP_TARGET,
       }
     : {
-        sourceHandle: "top-source",
-        targetHandle: "bottom-target",
+        sourceHandle: SourceHandleTypes.TOP_SOURCE,
+        targetHandle: TargetHandleTypes.BOTTOM_TARGET,
       };
 }
 

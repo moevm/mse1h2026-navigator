@@ -16,11 +16,7 @@ export const BasicNode: FC<PropsType> = memo(({ data }) => {
       <Handle id="left-target" type="target" position={Position.Left} />
       <Handle id="right-target" type="target" position={Position.Right} />
 
-      <div className="text-center break-words px-2 max-w-30">
-        {data.title}
-        <br />
-        Это базовая нода
-      </div>
+      <div className="text-center break-words px-2 max-w-30">{data.title}</div>
     </div>
   );
 });

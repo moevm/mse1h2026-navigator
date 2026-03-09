@@ -26,7 +26,6 @@ export const mapSkillsToFlow = (
     id: `${rel.fromId}-${rel.toId}`,
     source: rel.fromId,
     target: rel.toId,
-    type: "smoothstep",
   }));
 
   return { nodes, edges };
