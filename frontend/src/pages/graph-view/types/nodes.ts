@@ -1,26 +1,14 @@
+import type { MainSkill, Skill } from "@/entities/skill";
 import type { Node } from "@xyflow/react";
 
-export interface BaseNode extends Node {
-  title: string;
-  description: string;
-}
-
-export interface MainNode extends BaseNode {
+export interface MainNode extends Node {
   type: "main";
-  mainSpecificField?: string;
+  data: MainSkill;
 }
 
-export interface BasicNode extends BaseNode {
+export interface BasicNode extends Node {
   type: "basic";
-  data: {
-    isCompleted: boolean;
-    isRequired: boolean;
-    isArchieved: boolean;
-    priority: number;
-    courses: any[]; // TODO: поменять any[] на типы (когда будут понятны данные)
-    books: any[];
-    articles: any[];
-  };
+  data: Skill;
 }
 
 export type GraphNode = MainNode | BasicNode;
