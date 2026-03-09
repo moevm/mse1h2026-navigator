@@ -1,10 +1,11 @@
-import { createContext, useContext, type ReactNode } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { GraphStore } from "./graphStore";
 
 const GraphStoreContext = createContext<GraphStore | null>(null);
 
 export const GraphStoreProvider = ({ children }: { children: ReactNode }) => {
-  const graphStore = new GraphStore();
+  const [graphStore] = useState(() => new GraphStore());
 
   return (
     <GraphStoreContext.Provider value={graphStore}>
