@@ -4,7 +4,7 @@ import { MainPage } from "./pages/main/Page";
 import { SecondaryPage } from "./pages/secondary/Page";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
-import { RFExamplePage } from "./pages/rfExample/page";
+import { GraphPage } from "./pages/graph-view";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -12,7 +12,7 @@ createRoot(document.getElementById("root")!).render(
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/secondary" element={<SecondaryPage />} />
-        <Route path="/rf_example" element={<RFExamplePage />} />
+        <Route path="/graph" element={<GraphPage />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
