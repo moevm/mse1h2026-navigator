@@ -1,11 +1,12 @@
-export { WikipediaRepository } from "./repository";
-export { WikipediaService } from "./service";
-export { WikipediaController } from "./controller";
+export { WikipediaApiClient } from "./client";
+export type { WikipediaArticleExtract } from "./basic.types";
+export type { WikipediaPage } from "./entity.types";
+export type { WikipediaQueryParams, WikipediaSearchExtractRequest } from "./request.types";
 export type {
-  WikipediaPage,
-  WikipediaQuery,
-  WikipediaContinue,
   WikipediaApiResponse,
-  WikipediaRequestParams,
-  WikipediaQueryParams,
-} from "./types";
+  WikipediaContinue,
+  WikipediaMediaItem,
+  WikipediaMediaListResponse,
+  WikipediaMediaSrcsetItem,
+  WikipediaQuery,
+} from "./response.types";
