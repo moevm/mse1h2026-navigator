@@ -2,10 +2,8 @@ import { injectable, singleton } from "tsyringe";
 import axios, { AxiosRequestConfig } from "axios";
 
 import { GetTokenResponse, StepikCourseResponse } from "./response.types";
-
 import { OAuthTokenRequest, SearchCoursesRequest } from "./request.types";
-
-import { StepikCourse } from "./entity.types";
+import { Course, StepikCourse } from "./entity.types";
 
 import {
   LearningTimeInfo,
@@ -38,6 +36,59 @@ export class StepikApiClient {
   constructor() {
     this.clientId = process.env.STEPIK_CLIENT_ID || "";
     this.clientSecret = process.env.STEPIK_CLIENT_SECRET || "";
+  }
+
+  public async getAgregatedCourseInfo(title: string): Promise<Course | null> {
+    try {
+      const response: StepikCourseResponse =
+        await this.searchCoursesByName(title);
+
+      if (!response.courses.length) {
+        return null;
+      }
+
+      const stepikCourse: StepikCourse | undefined = response.courses[0];
+      if (!stepikCourse) {
+        return null;
+      }
+
+      const learningTimeInfo: LearningTimeInfo =
+        this.estimateCourseLearningTime(stepikCourse);
+
+      return {
+        id: String(stepikCourse.id),
+        title: stepikCourse.title,
+        description: stepikCourse.description,
+        learningTimeInfo,
+        link: `https://stepik.org/course/${stepikCourse.id}/promo`,
+        image: stepikCourse.cover || undefined,
+      };
+    } catch (e: unknown) {
+      console.error(e);
+      return null;
+    }
+  }
+
+  private estimateCourseLearningTime(course: StepikCourse): LearningTimeInfo {
+    const duration = this.extractCourseDuration(course);
+
+    if (duration === null) {
+      return {
+        minHours: 0,
+        avgHours: 0,
+        maxHours: 0,
+        coursesAnalyzed: 1,
+      };
+    }
+
+    const hours = Math.round(duration);
+
+    return {
+      minHours: hours,
+      avgHours: hours,
+      maxHours: hours,
+      coursesAnalyzed: 1,
+    };
   }
 
   public async searchCoursesByName(
