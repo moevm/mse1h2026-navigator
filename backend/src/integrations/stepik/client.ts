@@ -1,12 +1,8 @@
-import { injectable, singleton } from "tsyringe";
+import { container, injectable, singleton } from "tsyringe";
 import axios, { AxiosRequestConfig } from "axios";
-
 import { GetTokenResponse, StepikCourseResponse } from "./response.types";
-
 import { OAuthTokenRequest, SearchCoursesRequest } from "./request.types";
-
-import { StepikCourse } from "./entity.types";
-
+import { Course, StepikCourse } from "./entity.types";
 import {
   LearningTimeInfo,
   DurationEstimate,
@@ -22,12 +18,13 @@ export class StepikApiClient {
   private expiresAt: number | null = null;
 
   private readonly baseUrl = "https://stepik.org";
-  private readonly EXPIRY_BUFFER_MS = 60 * 1000;
-
+  private readonly EXPIRY_BUFFER_MS = 60000;
   private readonly SECONDS_IN_HOUR = 3600;
   private readonly DEFAULT_SAMPLE_SIZE = 5;
   private readonly LESSON_DURATION_MINUTES = 20;
   private readonly MINUTES_IN_HOUR = 60;
+
+  private readonly MIN_COURSE_HOURS = 15;
 
   private readonly CONFIDENCE: ConfidenceLevels = {
     HIGH: 1,
@@ -38,6 +35,43 @@ export class StepikApiClient {
   constructor() {
     this.clientId = process.env.STEPIK_CLIENT_ID || "";
     this.clientSecret = process.env.STEPIK_CLIENT_SECRET || "";
+  }
+
+  public async getAgregatedCourseInfo(
+    title: string,
+    limit: number = 3,
+    freeOnly: boolean = true,
+  ): Promise<Course[]> {
+    const courses = await this.getAllCoursesByName(title, 50);
+
+    // Filtration is here because STEPIK api doesn't provide in-request filtering
+    const filtered = courses
+      .map((course) => ({
+        course,
+        duration: this.extractCourseDuration(course),
+      }))
+      .filter((x) => x.duration !== null)
+      .filter((x) => x.duration! >= this.MIN_COURSE_HOURS)
+      .filter((x) => {
+        if (!freeOnly) return true;
+        return x.course.is_paid === false;
+      })
+      .sort((a, b) => b.duration! - a.duration!)
+      .slice(0, limit);
+
+    return filtered.map(({ course, duration }) => ({
+      id: String(course.id),
+      title: course.title,
+      description: course.description,
+      learningTimeInfo: {
+        minHours: Math.round(duration!),
+        avgHours: Math.round(duration!),
+        maxHours: Math.round(duration!),
+        coursesAnalyzed: 1,
+      },
+      link: `https://stepik.org/course/${course.id}/promo`,
+      image: course.cover || undefined,
+    }));
   }
 
   public async searchCoursesByName(
@@ -56,30 +90,9 @@ export class StepikApiClient {
     });
   }
 
-  public async estimateSkillLearningTime(
-    skillName: string,
-    sampleSize: number = this.DEFAULT_SAMPLE_SIZE,
-  ): Promise<LearningTimeInfo> {
-    const courses = await this.getAllCoursesByName(skillName, sampleSize);
-
-    if (!courses.length) {
-      throw new Error("No courses found for this skill");
-    }
-
-    const durations = courses
-      .map((course) => this.extractCourseDuration(course))
-      .filter((d): d is number => d !== null);
-
-    if (!durations.length) {
-      throw new Error("Unable to estimate course durations");
-    }
-
-    return this.calculateStats(durations);
-  }
-
   public async getAllCoursesByName(
     name: string,
-    maxLength = 10,
+    maxLength = 30,
   ): Promise<StepikCourse[]> {
     let allCourses: StepikCourse[] = [];
     let page = 1;
@@ -94,6 +107,23 @@ export class StepikApiClient {
     }
 
     return allCourses;
+  }
+
+  public async estimateSkillLearningTime(
+    skillName: string,
+    sampleSize: number = this.DEFAULT_SAMPLE_SIZE,
+  ): Promise<LearningTimeInfo> {
+    const courses = await this.getAllCoursesByName(skillName, sampleSize);
+
+    const durations = courses
+      .map((course) => this.extractCourseDuration(course))
+      .filter((d): d is number => d !== null);
+
+    if (!durations.length) {
+      throw new Error("Unable to estimate course durations");
+    }
+
+    return this.calculateStats(durations);
   }
 
   private extractCourseDuration(course: StepikCourse): number | null {
@@ -138,6 +168,7 @@ export class StepikApiClient {
 
   private calculateStats(durations: number[]): LearningTimeInfo {
     const total = durations.reduce((sum, d) => sum + d, 0);
+
     const avg = total / durations.length;
     const min = Math.min(...durations);
     const max = Math.max(...durations);
@@ -182,17 +213,21 @@ export class StepikApiClient {
     if (!this.isTokenValid()) {
       await this.refreshToken();
     }
+
     return this.accessToken!;
   }
 
   private isTokenValid(): boolean {
     if (!this.accessToken || !this.expiresAt) return false;
+
     const now = Date.now();
+
     return now < this.expiresAt - this.EXPIRY_BUFFER_MS;
   }
 
   private async refreshToken(): Promise<void> {
     const tokenResponse = await this.getToken();
+
     this.accessToken = tokenResponse.access_token;
     this.expiresAt = Date.now() + tokenResponse.expires_in * 1000;
   }
