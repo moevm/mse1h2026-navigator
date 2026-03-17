@@ -1,0 +1,41 @@
+[
+  {
+    "id": "237798",
+    "title": "Developer PRO: Python‑разработчик + Алгоритмы + Bash/Git",
+    "description": "<p><strong>Добро пожаловать на программу «Developer PRO: Python‑разработчик + Алгоритмы + Bash/Git»!</strong><br>\nЭто комплекс из трёх полноценных курсов, который шаг за шагом превращает любителя программирования в уверенного middle‑разработчика. Ниже — всё, что нужно знать перед записью.</p>\n\n<h3>Цели программы</h3>\n\n<ul>\n\t<li>\n\t<p>Сформировать алгоритмическое мышление и научить подбирать оптимальные структуры данных.</p>\n\t</li>\n\t<li>\n\t<p>Дать практический, современный Python&nbsp;3.12+ со всеми «фишками» профи‑уровня.</p>\n\t</li>\n\t<li>\n\t<p>Научить автоматизировать рутину и грамотно управлять кодовой базой с Bash‑скриптами и Git workflow.</p>\n\t</li>\n\t<li>\n\t<p>Подготовить к техническим собеседованиям на позиции Python‑/Backend‑/DevOps‑разработчика.</p>\n\t</li>\n</ul>\n\n<h3>Почему стоит выбрать именно нас</h3>\n\n<p><strong>Синергия трёх дисциплин.&nbsp;</strong>Вы учитесь сразу писать оптимальный код, автоматизировать деплой и работать в команде.</p>\n\n<p><strong>Формат “учись‑делая”.&nbsp;</strong>Каждая теория закрепляется интерактивными задачами и тестами; никаких «сухих» лекций.</p>\n\n<p><strong>Пожизненный доступ и обновления.&nbsp;</strong>Все 3 курса программы постоянно обновляются и не теряют актуальность со времен.</p>\n\n<p><strong>Сообщество и поддержка. </strong>Помощь в комментариях, код‑ревью от автора — не останетесь один на один с проблемой.</p>\n\n<h3>Что вы приобретёте</h3>\n\n<ul>\n\t<li>\n\t<p>Умение оценивать сложность и эффективность решений, быстро находить «узкие места».</p>\n\t</li>\n\t<li>\n\t<p>Навыки написания производственного Python‑кода: от генераторов до асинхронных сервисов.</p>\n\t</li>\n\t<li>\n\t<p>Полный набор CLI‑приёмов Bash для ежедневной автоматизации.</p>\n\t</li>\n\t<li>\n\t<p>Профессиональный Git‑workflow: ветвление, rebase, CI/CD‑пайплайны, Git&nbsp;Hooks.</p>\n\t</li>\n\t<li>\n\t<p>Портфолио из 6+ проектов (стек, очередь, детерминированный Quick Sort, дерево отрезков, bash‑фильтры, комплексный репозиторий с CI).</p>\n\t</li>\n\t<li>\n\t<p>Готовность уверенно проходить алгоритмические и системные части интервью.</p>\n\t</li>\n</ul>\n\n<h3>Как будет организовано обучение</h3>\n\n<ol>\n\t<li>\n\t<p><strong>Читаете теорию: </strong>если что то непонятно, не стесняйтесь писать в комментарии.</p>\n\t</li>\n\t<li>\n\t<p><strong>Решаете тренажёры</strong>: тесты с автопроверкой и задачи на код.</p>\n\t</li>\n\t<li>\n\t<p><strong>Выполняете задачи с код-ревью: </strong>они проверяются преподавателем вручную.</p>\n\t</li>\n\t<li>\n\t<p><strong>Получаете фидбек</strong> в рецензии, при необходимости дорабатываете.</p>\n\t</li>\n\t<li>\n\t<p><strong>Фиксируете результат в портфолио</strong> и переходите к следующему модулю.</p>\n\t</li>\n</ol>\n\n<h3>Разделы и задания, которые вас ждут</h3>\n\n<p><strong>Алгоритмы и структуры данных:&nbsp;</strong>O‑нотации, массивы, списки, стеки, очереди, сортировки, кучи, деревья, хэш‑таблицы, Детерминированный Quick Sort, дерево отрезков. В доработке находятся модули по графам, теории чисел, геометрии и потокам.</p>\n\n<p><strong>Python для профессионалов:&nbsp;</strong>Итераторы, генераторы, декораторы, контекст‑менеджеры, asyncio, метаклассы, оптимизация.</p>\n\n<p><strong>Bash + Git:&nbsp;</strong>Shell‑команды, скрипты, regex, cron, сетевые утилиты, Git‑workflow, CI/CD, Git&nbsp;Hooks, Репозиторий с автоматическим деплоем через GitHub Actions</p>",
+    "learningTimeInfo": {
+      "minHours": 28,
+      "avgHours": 28,
+      "maxHours": 28,
+      "coursesAnalyzed": 1
+    },
+    "link": "https://stepik.org/course/237798/promo",
+    "image": "https://cdn.stepik.net/media/cache/images/courses/237798/cover_6vZ9cMX/9f4681010f0e472aad426c41b104196d.png"
+  },
+  {
+    "id": "225957",
+    "title": "Junior Python Developer и Data Scientist +интервью тесты",
+    "description": "<p>Присоединяйтесь к комьюнити по Python &gt;&gt;&gt; <a href=\"https://t.me/KodduuPython\" rel=\"noopener noreferrer nofollow\" target=\"_blank\">https://t.me/KodduuPython</a> &lt;&lt;&lt;</p>\n\n<p>Первая часть специализации очень хорошо структурирована, поэтому это самый быстрый способ узнать основу Python. В курсе есть вся база для того чтобы стать разработчиком, после завершения вы сможете сделать свой проект на Python. Цель курса максимально быстро и точно погрузить Вас в прекрасный мир разработки. </p>\n\n<p>Вторая часть включает всю базу для того чтобы стать Data Science инженером, после завершения вы сможете сделать свой проект на Python в области Data Science. Цель курса максимально быстро и точно погрузить Вас в прекрасный мир Data Science.</p>\n\n<p>Третья часть покрывает множество разных библиотек и идей кода, двигая Вас к быстрому росту за счет получения разносторонней информации и не давая Вам скучать.</p>\n\n<p>Четвертая часть это курс-шпаргалка по Python. В курсе собраны вопросы с более чем 300 реальных собеседований по Python. Вопросы с собеседований на Python Developer в 2023-2024 годах. На каждый вопрос приведен развернутый ответ + тест для проверки знаний этого вопроса. Вопросы расположены по вероятности их появления в среднем интервью. Вначале наиболее вероятные, дальше наименее.</p>\n\n<p>Выбирайте Python - самый популярный язык на сегодняшний день, и Data Science - самую интересную и востребованную область!</p>\n\n<p>Посмотрите другие наши программы:</p>\n\n<p><a href=\"https://stepik.org/219364\" rel=\"noopener noreferrer nofollow\">Junior Python Data Scientist</a></p>\n\n<p><a href=\"https://stepik.org/204886\" rel=\"noopener noreferrer nofollow\">Junior FullStack Developer: Python+JavaScript (быстрый курс)</a></p>",
+    "learningTimeInfo": {
+      "minHours": 18,
+      "avgHours": 18,
+      "maxHours": 18,
+      "coursesAnalyzed": 1
+    },
+    "link": "https://stepik.org/course/225957/promo",
+    "image": "https://cdn.stepik.net/media/cache/images/courses/225957/cover_v1AJeTr/f571353598b68a3171f4689cafe12996.png"
+  },
+  {
+    "id": "220642",
+    "title": "FullStack Developer and Data Scientist (Python+JS+Data+CookBook)",
+    "description": "<p>Присоединяйтесь к комьюнити по Python &gt;&gt;&gt; https://t.me/KodduuPython &lt;&lt;&lt;</p>\n\n<p>В эту программу входят 4 хорошо структурированных курса. Цель программы курсов максимально быстро и точно погрузить Вас в прекрасный мир разработки на Python и JavaScript, то есть в мир FullStack Development, плюс прекрасный мир Data Science.</p>\n\n<p>Python используется для Backend разработки, автоматизации тестирования и Data Science. JavaScript для Frontend разработки. Два этих языка позволят Вам начать работать с Front и Back.</p>\n\n<p>И вам не будет скучно, потому что, в рамках курса в формате CookBook (набор рецептов кода для дальнейшего развития), вы будете:</p>\n\n<ul>\n\t<li>Писать мини игры</li>\n\t<li>Анализировать/создавать данные (Data Science)</li>\n\t<li>Обучать нейросети (сверточные нейронные сети, глубокое обучение)</li>\n\t<li>Парсить сайты</li>\n\t<li>Красиво отображать данные</li>\n\t<li>Создавать чат ботов</li>\n\t<li>Работать с БД и CSV</li>\n\t<li>Работать с rest API</li>\n\t<li>Использовать алгоритмы поиска</li>\n</ul>\n\n<p>Выбирайте Python - самый популярный язык на сегодняшний день, и Data Science - самую интересную и востребованную область!</p>\n\n<p>Посмотрите другие наши программы:</p>\n\n<p><a href=\"https://stepik.org/220637\" rel=\"noopener noreferrer nofollow\">Junior FullStack Developer and Data Scientist (Python+JS+Data)</a></p>\n\n<p><a href=\"https://stepik.org/204886\" rel=\"noopener noreferrer nofollow\">Junior FullStack Developer: Python+JavaScript (быстрый курс)</a></p>\n\n<p><a href=\"https://stepik.org/219364\" rel=\"noopener noreferrer nofollow\">Junior Python Data Scientist</a></p>",
+    "learningTimeInfo": {
+      "minHours": 16,
+      "avgHours": 16,
+      "maxHours": 16,
+      "coursesAnalyzed": 1
+    },
+    "link": "https://stepik.org/course/220642/promo",
+    "image": "https://cdn.stepik.net/media/cache/images/courses/220642/cover_nd2DPzE/a79cc46038215b773a28bbc589ac6de1.png"
+  }
+]

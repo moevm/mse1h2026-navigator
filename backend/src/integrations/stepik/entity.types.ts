@@ -1,4 +1,6 @@
-export interface StepikCourse {
+import type { LearningTimeInfo } from "./basic.types";
+
+export type StepikCourse = {
   id: number;
 
   title: string;
@@ -186,4 +188,13 @@ export interface StepikCourse {
 
   enrollment: any | null;
   issue: any | null;
-}
+};
+
+export type Course = {
+  id: string;
+  title: string;
+  description: string;
+  learningTimeInfo: LearningTimeInfo;
+  link: string;
+  image?: string;
+};
