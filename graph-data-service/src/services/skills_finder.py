@@ -58,6 +58,13 @@ class SkillsFinder:
 
             ratio = max(token_set, partial, token_sort)
 
+            if ratio == best_ratio:
+                best_profession = (
+                    profession
+                    if not best_profession or len(profession) < len(best_profession)
+                    else best_profession
+                )
+
             if ratio > best_ratio:
                 best_ratio = ratio
                 best_profession = profession
