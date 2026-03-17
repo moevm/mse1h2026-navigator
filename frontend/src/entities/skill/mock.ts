@@ -16,15 +16,74 @@ export const getSkillsGraph = async (): Promise<{
       {
         id: "2",
         title: "Математика",
-        description: "Описание математики",
-        learnHours: 10,
+        description:
+          "Фундамент для ML: линейная алгебра, анализ, вероятность и базовая оптимизация. Помогает понимать модели, метрики и границы применимости.",
+        learnHours: 14,
         priority: 1,
         isArchieved: false,
         isCompleted: false,
         isRequired: false,
-        articles: [],
-        books: [],
-        courses: [],
+        articles: [
+          {
+            id: "a-2047",
+            link: "https://example.com/ml-math-roadmap",
+            title: "Математика для ML: базовая карта тем",
+            description:
+              "Краткий гид по темам, которые чаще всего встречаются в машинном обучении.",
+            rating: 4.8,
+            tags: ["линейная алгебра", "вероятность", "оптимизация"],
+          },
+          {
+            id: "a-2047",
+            link: "https://example.com/ml-math-roadmap",
+            title: "Математика для ML: базовая карта тем",
+            description:
+              "Краткий гид по темам, которые чаще всего встречаются в машинном обучении.",
+            rating: 4.8,
+            tags: ["линейная алгебра", "вероятность", "оптимизация"],
+          },
+          {
+            id: "a-3179",
+            link: "https://example.com/metrics-and-losses",
+            title: "Метрики и функции потерь: интуиция и примеры",
+            description:
+              "Разбор того, как математика влияет на выбор метрик и обучение моделей.",
+            rating: 4.7,
+            tags: ["метрики", "градиенты", "ошибки"],
+          },
+        ],
+        books: [
+          {
+            link: "https://example.com/linear-algebra-notes",
+            title: "Линейная алгебра для инженеров данных",
+            description:
+              "Векторы, матрицы, разложения и геометрическая интерпретация.",
+            author: "Мария Горелова",
+            id: "b-552",
+          },
+          {
+            link: "https://example.com/probability-for-ml",
+            title: "Вероятность и статистика для ML",
+            description: "Распределения, выборки, байесовская интуиция.",
+            author: "Александр Котов",
+            id: "b-711",
+          },
+        ],
+        courses: [
+          {
+            id: "c-9011",
+            learningTimeInfo: {
+              maxHours: 28,
+              avgHours: 16,
+              minHours: 8,
+              coursesAnalyzed: 9,
+            },
+            title: "Математика для машинного обучения",
+            description:
+              "Практический курс по ключевым разделам с примерами из ML.",
+            link: "https://example.com/ml-math-course",
+          },
+        ],
       },
       {
         id: "3",
