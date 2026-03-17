@@ -1,0 +1,13 @@
+services:
+  fastapi_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my_api_container
+    env_file:
+      - .env
+    environment:
+      - APP_PORT=${APP_PORT}
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    restart: unless-stopped
