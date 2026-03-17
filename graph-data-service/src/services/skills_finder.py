@@ -33,6 +33,8 @@ class SkillsFinder:
 
             skill_names.append(skill_name)
 
+        print(f"Overall skills amount: {len(skill_names)}")
+
         return skill_names
 
     def __find_best_ratio_profession(self):
@@ -56,11 +58,12 @@ class SkillsFinder:
 
             ratio = max(token_set, partial, token_sort)
 
-            print(f"Comparing '{query}' with '{profession_norm}': ratio={ratio}")
-
             if ratio > best_ratio:
                 best_ratio = ratio
                 best_profession = profession
+                print(
+                    f"Best ratio now is {best_ratio}. Comparing '{query}' with '{profession_norm}'"
+                )
 
         if best_profession is None:
             return None

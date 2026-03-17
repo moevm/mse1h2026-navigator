@@ -39,3 +39,18 @@ class NormalizedSkill(BaseModel):
                 normalized.append(s)
 
         return normalized
+
+
+class SkillEdge(BaseModel):
+    from_skill: str
+    to_skill: str
+
+
+class ProfessionRoadmap(BaseModel):
+    """
+    Структура дорожной карты развития по профессии.
+    Связи должны отражать логику обучения: от основ к сложным инструментам.
+    Если инструмент зависит от другого инструмента, то он должен идти только после него.
+    """
+
+    edges: list[SkillEdge]

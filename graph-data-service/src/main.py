@@ -1,6 +1,10 @@
-from fastapi import FastAPI, HTTPException
+import dotenv
+from fastapi import FastAPI
 
 from .services.skills_finder import SkillsFinder
+from .services.skills_normalizer import SkillsNormalizer
+
+dotenv.load_dotenv()
 
 app = FastAPI(title="Graph data service")
 
@@ -13,4 +17,9 @@ def read_root():
 @app.get("/get_skill_graph/{job_title}")
 def get_skill_graph(job_title: str):
     _skills_finder = SkillsFinder(job_title)
-    return {"response": _skills_finder.get_skills_list()}
+    skills_list = _skills_finder.get_skills_list()
+
+    skills_normalizer = SkillsNormalizer(skills_list, job_title)
+    normalized_skills = skills_normalizer.get_normalized_skills()
+
+    return {"response": normalized_skills}
