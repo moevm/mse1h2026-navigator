@@ -9,9 +9,9 @@ class SkillsFinder:
         "developer-roadmap/contents/src/data/roadmaps/"
     )
 
-    def __init__(self, profession_title, minimal_ratio=60):
-        self.profession_title = profession_title
-        self.minimal_ratio = minimal_ratio
+    def __init__(self, profession_name, minimal_ratio=60):
+        self._profession_name = profession_name
+        self._minimal_ratio = minimal_ratio
 
     def get_skills_list(self):
         profession_name = self.__find_best_ratio_profession()
@@ -44,7 +44,7 @@ class SkillsFinder:
         for title in profession_titles:
             formatted_titles.append(" ".join(title.split("-")))
 
-        query = self.__normalize(self.profession_title)
+        query = self.__normalize(self._profession_name)
 
         best_ratio = 0
         best_profession = None
@@ -75,7 +75,7 @@ class SkillsFinder:
         if best_profession is None:
             return None
 
-        if best_ratio >= self.minimal_ratio:
+        if best_ratio >= self._minimal_ratio:
             return "-".join(best_profession.split(" "))
 
         return None

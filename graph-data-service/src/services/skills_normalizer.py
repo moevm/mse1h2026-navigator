@@ -53,4 +53,4 @@ class SkillsNormalizer:
             ],
             max_retries=3,
         )
-        return result
+        return result.skills
