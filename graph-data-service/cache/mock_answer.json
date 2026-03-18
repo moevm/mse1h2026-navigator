@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    "GitHub",
+    "Code refactoring",
+    "Test-driven development",
+    "Git",
+    "Debugging",
+    "Modular programming",
+    "Version control",
+    "Software testing"
+  ],
+  "edges": [
+    {
+      "from_skill": "Test-driven development",
+      "to_skill": "Software testing"
+    },
+    {
+      "from_skill": "Test-driven development",
+      "to_skill": "Code refactoring"
+    },
+    {
+      "from_skill": "Code refactoring",
+      "to_skill": "Modular programming"
+    },
+    {
+      "from_skill": "Software testing",
+      "to_skill": "Debugging"
+    },
+    {
+      "from_skill": "Debugging",
+      "to_skill": "Git"
+    },
+    {
+      "from_skill": "Git",
+      "to_skill": "Version control"
+    },
+    {
+      "from_skill": "Git",
+      "to_skill": "GitHub"
+    }
+  ]
+}
