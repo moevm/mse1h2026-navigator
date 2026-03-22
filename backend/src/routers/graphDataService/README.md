@@ -52,7 +52,7 @@ container.register<ISkillGraphRepository>("ISkillGraphRepository", {
 });
 ```
 
-### Thin resolver
+### resolver
 
 Резолвер не содержит логики — только принимает аргументы и вызывает сервис. Сервис можно тестировать независимо от GraphQL.
 
