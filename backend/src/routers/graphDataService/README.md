@@ -31,20 +31,6 @@
       │
       └─[3/3] маппинг рёбер title → slug-id
 ```
-
-## Параметр `isMock`
-
-| | `isMock: true` | `isMock: false` |
-|---|---|---|
-| **graph-data-service** | `is_mock: true` (берёт mock JSON) | `is_mock: false` (LLM, нужен `HF_TOKEN`) |
-| **Stepik / Habr / OpenLibrary / Wikipedia** | не вызываются | вызываются параллельно |
-| **Скорость** | ~300ms | 10–30s |
-| **Использование** | разработка / демо | продакшн |
-
-По умолчанию `isMock` не передан → `false`. Для разработки передавать явно `isMock: true`.
-
----
-
 ## GraphQL endpoint
 
 ```
