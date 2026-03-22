@@ -12,13 +12,18 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@apollo/server": "^4.13.0",
     "axios": "^1.13.5",
+    "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "graphql": "^16.13.1",
     "reflect-metadata": "^0.2.2",
-    "tsyringe": "^4.10.0"
+    "tsyringe": "^4.10.0",
+    "type-graphql": "^2.0.0-rc.3"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.0",
