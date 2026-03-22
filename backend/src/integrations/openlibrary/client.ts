@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { injectable } from 'tsyringe';
 
 import type { SearchBooksRequest } from './request.types';
 import type {
@@ -25,6 +26,7 @@ const SEARCH_FIELDS = [
   'number_of_pages_median',
 ].join(',');
 
+@injectable()
 export class OpenLibraryClient {
   private readonly baseUrl = 'https://openlibrary.org';
   private readonly coversUrl = 'https://covers.openlibrary.org';

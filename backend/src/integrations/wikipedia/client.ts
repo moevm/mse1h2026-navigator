@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
+import { injectable } from "tsyringe";
 
 import { WikipediaArticleExtract } from "./basic.types";
 import { WikipediaSearchExtractRequest } from "./request.types";
@@ -7,6 +8,7 @@ import {
   WikipediaMediaListResponse,
 } from "./response.types";
 
+@injectable()
 export class WikipediaApiClient {
   private readonly apiUrl = "https://ru.wikipedia.org/w/api.php";
   private readonly restApiUrl = "https://ru.wikipedia.org/api/rest_v1";

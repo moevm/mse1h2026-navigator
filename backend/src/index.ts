@@ -8,12 +8,15 @@ import { healthRouter } from "./routers/health";
 import { habrRouter } from "./routers/habr";
 import { wikipediaRouter } from "./routers/wikipedia";
 import { createSchema } from "./graphql/schema";
+import { setupContainer } from "./container";
 
 dotenv.config();
 
 const PORT: number = Number(process.env.PORT) || 3000;
 
 async function bootstrap() {
+  setupContainer();
+
   const app = express();
   app.use(cors());
   app.use(express.json());
