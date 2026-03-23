@@ -52,7 +52,7 @@ container.register<ISkillGraphRepository>("ISkillGraphRepository", {
 });
 ```
 
-### resolver
+### Resolver
 
 Резолвер не содержит логики — только принимает аргументы и вызывает сервис. Сервис можно тестировать независимо от GraphQL.
 

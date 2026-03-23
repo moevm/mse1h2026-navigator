@@ -92,7 +92,7 @@ query GetSkillGraph($professionName: String!) {
 Минимальный запрос:
 
 ```bash
-curl -X POST http://localhost:3000/graphql \
+curl -X POST <APP.SOURCE>/graphql \
   -H "Content-Type: application/json" \
   -d '{
     "query": "query GetSkillGraph($professionName: String!) { skillGraph(professionName: $professionName) { mainSkill { id title } nodes { id title learnHours } edges { fromId toId } } }",
@@ -103,7 +103,7 @@ curl -X POST http://localhost:3000/graphql \
 Запрос со всеми полями:
 
 ```bash
-curl -X POST http://localhost:3000/graphql \
+curl -X POST <APP.SOURCE>/graphql \
   -H "Content-Type: application/json" \
   -d '{
     "query": "query GetSkillGraph($professionName: String!) { skillGraph(professionName: $professionName) { mainSkill { id title description } nodes { id title description isCompleted isRequired isArchieved priority learnHours courses { id title description link image learningTimeInfo { minHours avgHours maxHours coursesAnalyzed } } books { id title author description link image } articles { title description link rating tags } } edges { fromId toId } } }",
@@ -156,7 +156,7 @@ const query = `
   }
 `;
 
-const response = await fetch("http://localhost:3000/graphql", {
+const response = await fetch("<APP.SOURCE>/graphql", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
