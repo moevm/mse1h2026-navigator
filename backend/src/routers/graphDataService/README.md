@@ -34,7 +34,7 @@
 ## GraphQL endpoint
 
 ```
-POST http://localhost:3000/graphql
+POST <<APP.SOURCE>/graphql
 ```
 
 Подробные примеры запросов — в [`graphql/README.md`](./README.md).
