@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/client": "6",
     "axios": "^1.13.5",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
@@ -22,6 +23,7 @@
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.0",
+    "prisma": "6",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
   }
