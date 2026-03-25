@@ -49,6 +49,13 @@
 - Интеграция с Wikipedia API
 - Интеграция с другими образовательными платформами
 
+## Итерация №2
+### [Презентация](https://github.com/moevm/mse1h2026-navigator/blob/8fe3036b35aa6ac58e34b028776a9416c9906c34/docs/iteration_2/presentation.pdf)
+
+### [Скринкаст](https://github.com/moevm/mse1h2026-navigator/blob/8fe3036b35aa6ac58e34b028776a9416c9906c34/docs/iteration_2/screencast.mp4)
+
+### Запланированные задачи
+
 ## Итерация №Х
 ### Презентация
 
