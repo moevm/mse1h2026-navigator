@@ -7,6 +7,7 @@ import "./index.css";
 import { RFExamplePage } from "./pages/rfExample/page";
 import { ProfilePage } from "./pages/profile/Page";
 import { AuthCallbackPage } from "./pages/auth/callback/Page";
+import { GraphPage } from "./pages/graph-view";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -17,6 +18,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/rf_example" element={<RFExamplePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="/graph" element={<GraphPage />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
