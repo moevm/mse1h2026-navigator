@@ -21,7 +21,7 @@ export class GraphDataServiceClient {
   ): Promise<RawSkillGraph> {
     const payload: GetProfessionGraphRequest = {
       profession_title: professionTitle,
-      is_mock: true,
+      is_mock: process.env.IS_MOCK_GRAPH_DATA_SERVICE === "true" || isMock,
       use_cache: useCache,
     };
 
