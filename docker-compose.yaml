@@ -26,9 +26,11 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment:
       - DATABASE_URL=mongodb://mongo:27017/navigator?replicaSet=rs0
+      - JWT_SECRET=${JWT_SECRET:-navigator-dev-secret}
     depends_on:
       mongo-init:
         condition: service_completed_successfully
