@@ -26,12 +26,30 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment:
       - DATABASE_URL=mongodb://mongo:27017/navigator?replicaSet=rs0
+      - GRAPH_DATA_SERVICE_URL=http://graph-data-service:8000
+      - JWT_SECRET=${JWT_SECRET:-navigator-dev-secret}
     depends_on:
       mongo-init:
         condition: service_completed_successfully
+      graph-data-service:
+        condition: service_started
+
+  graph-data-service:
+    build:
+      context: ./graph-data-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: ./graph-data-service/.env
+        required: false
+    environment:
+      - APP_PORT=8000
+    restart: unless-stopped
 
 volumes:
   mongo-data:

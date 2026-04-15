@@ -8,13 +8,88 @@ generator client {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  yandexId  String   @unique
-  username  String
-  firstName String
-  lastName  String
-  avatarUrl String
-  skills    String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  yandexIdHash String   @unique
+  username     String
+  firstName    String
+  lastName     String
+  avatarUrl    String
+  skills       String[]
+  graphs       Graph[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Graph {
+  id                        String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId                    String          @db.ObjectId
+  user                      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  professionTitle           String
+  normalizedProfessionTitle String
+  mainSkill                 MainSkill
+  nodes                     Skill[]
+  edges                     SkillsRelation[]
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  @@unique([userId, normalizedProfessionTitle])
+}
+
+type MainSkill {
+  id          String
+  title       String
+  description String
+}
+
+type Skill {
+  id          String
+  title       String
+  description String
+  isCompleted Boolean
+  isRequired  Boolean
+  isArchieved Boolean
+  priority    Int
+  learnHours  Int
+  courses     Course[]
+  books       Book[]
+  articles    Article[]
+}
+
+type SkillsRelation {
+  fromId String
+  toId   String
+}
+
+type Course {
+  id               String
+  title            String
+  description      String
+  learningTimeInfo LearningTimeInfo?
+  link             String
+  image            String?
+}
+
+type LearningTimeInfo {
+  minHours        Int
+  avgHours        Int
+  maxHours        Int
+  coursesAnalyzed Int
+}
+
+type Book {
+  id          String
+  title       String
+  author      String
+  description String
+  link        String
+  image       String?
+}
+
+type Article {
+  id          String
+  title       String
+  description String
+  link        String
+  rating      Float
+  tags        String[]
 }
