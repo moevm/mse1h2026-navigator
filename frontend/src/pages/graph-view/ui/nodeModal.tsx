@@ -1,5 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { useNodeModalStore } from "../services/nodeModalStore.context";
+import { useGraphStore } from "../services/graphStore.context";
 import type { MainSkill, Skill } from "@/entities/skill";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +15,11 @@ type NodeModalData = Partial<Skill & MainSkill>;
 
 export const NodeModal = observer(() => {
   const nodeModalStore = useNodeModalStore();
+  const graphStore = useGraphStore();
 
   const selectedNode = nodeModalStore.selectedNode;
   const data = (selectedNode?.data ?? {}) as NodeModalData;
+  const canUpdateProgress = typeof data.isCompleted === "boolean" && selectedNode;
 
   return (
     <Dialog
@@ -178,6 +181,20 @@ export const NodeModal = observer(() => {
           </div>
 
           <div className="flex items-center justify-end gap-3 border-t border-blue-100/70 px-8 py-5">
+            {canUpdateProgress && (
+              <Button
+                type="button"
+                variant={data.isCompleted ? "outline" : "default"}
+                onClick={() => {
+                  void graphStore.updateNodeCompletion(
+                    selectedNode.id,
+                    !data.isCompleted,
+                  ).then(() => nodeModalStore.close());
+                }}
+              >
+                {data.isCompleted ? "Снять отметку" : "Отметить изученным"}
+              </Button>
+            )}
             <DialogClose asChild>
               <Button
                 variant="secondary"
