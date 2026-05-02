@@ -1,9 +1,11 @@
 import axios, { AxiosRequestConfig } from "axios";
+import { injectable } from "tsyringe";
 
 import { HabrParsedArticle } from "./basic.types";
 import { HabrSearchArticlesRequest } from "./request.types";
 import { HabrSearchArticlesResponse } from "./response.types";
 
+@injectable()
 export class HabrApiClient {
   private readonly apiUrl = "https://habr.com/kek/v2/articles/";
   private readonly defaultQuery = "python";
