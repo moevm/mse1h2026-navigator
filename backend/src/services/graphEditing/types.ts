@@ -52,6 +52,9 @@ export interface GraphResponse {
   mainSkill: MainSkill;
   nodes: Skill[];
   edges: SkillsRelation[];
+  initialMainSkill: MainSkill;
+  initialNodes: Skill[];
+  initialEdges: SkillsRelation[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -7,7 +7,8 @@
     "build": "tsc",
     "start": "bun dist/index.js",
     "test": "vitest run",
-    "demo:graph-editing": "bun src/scripts/graphEditingDemo.ts"
+    "demo:graph-editing": "bun src/scripts/graphEditingDemo.ts",
+    "demo:graph-build-persistence": "bun src/scripts/graphBuildPersistenceDemo.ts"
   },
   "keywords": [],
   "author": "",

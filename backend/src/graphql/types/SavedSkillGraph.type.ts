@@ -20,6 +20,15 @@ export class SavedSkillGraphGql {
   @Field(() => [SkillsRelationGql])
   edges: SkillsRelationGql[] = [];
 
+  @Field(() => MainSkillGql)
+  initialMainSkill: MainSkillGql = new MainSkillGql();
+
+  @Field(() => [SkillGql])
+  initialNodes: SkillGql[] = [];
+
+  @Field(() => [SkillsRelationGql])
+  initialEdges: SkillsRelationGql[] = [];
+
   @Field(() => Date)
   createdAt: Date = new Date();
 

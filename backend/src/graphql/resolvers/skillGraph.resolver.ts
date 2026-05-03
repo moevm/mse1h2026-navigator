@@ -19,9 +19,11 @@ import {
   deleteGraphEdge as deleteGraphEdgeService,
   deleteGraphNode as deleteGraphNodeService,
   getGraphSubgraph,
+  getInitialUserGraph,
   getUserGraph,
   listUserGraphs,
   normalizeBuiltGraphData,
+  resetUserGraphToInitial,
   updateGraphNode as updateGraphNodeService,
 } from "../../services/graphEditing/service";
 import type {
@@ -78,6 +80,17 @@ export class SkillGraphResolver {
   ): Promise<SavedSkillGraphGql> {
     const user = requireGraphQLUser(context);
     return this.toSavedSkillGraphGql(await getUserGraph(user.id, graphId));
+  }
+
+  @Query(() => SavedSkillGraphGql, {
+    description: "Исходный снимок сохраненного графа текущего пользователя",
+  })
+  async initialSavedGraph(
+    @Arg("graphId") graphId: string,
+    @Ctx() context: GraphQLContext
+  ): Promise<SavedSkillGraphGql> {
+    const user = requireGraphQLUser(context);
+    return this.toSavedSkillGraphGql(await getInitialUserGraph(user.id, graphId));
   }
 
   @Query(() => SavedSkillGraphGql, {
@@ -196,6 +209,19 @@ export class SkillGraphResolver {
     const user = requireGraphQLUser(context);
     return this.toSavedSkillGraphGql(
       await deleteGraphEdgeService(user.id, graphId, input.fromId, input.toId)
+    );
+  }
+
+  @Mutation(() => SavedSkillGraphGql, {
+    description: "Сбросить текущий граф к исходному снимку",
+  })
+  async resetGraphToInitial(
+    @Arg("graphId") graphId: string,
+    @Ctx() context: GraphQLContext
+  ): Promise<SavedSkillGraphGql> {
+    const user = requireGraphQLUser(context);
+    return this.toSavedSkillGraphGql(
+      await resetUserGraphToInitial(user.id, graphId)
     );
   }
 

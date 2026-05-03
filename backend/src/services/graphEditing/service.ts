@@ -30,6 +30,9 @@ type GraphWithData = Graph & {
   mainSkill: MainSkill;
   nodes: Skill[];
   edges: SkillsRelation[];
+  initialMainSkill: MainSkill;
+  initialNodes: Skill[];
+  initialEdges: SkillsRelation[];
 };
 
 interface BuiltGraphData {
@@ -127,6 +130,9 @@ export function mapGraphResponse(graph: GraphWithData): GraphResponse {
     mainSkill: graph.mainSkill,
     nodes: graph.nodes,
     edges: graph.edges,
+    initialMainSkill: graph.initialMainSkill,
+    initialNodes: graph.initialNodes,
+    initialEdges: graph.initialEdges,
     createdAt: graph.createdAt,
     updatedAt: graph.updatedAt,
   };
@@ -221,6 +227,55 @@ export function normalizeBuiltGraphData(graph: {
       })),
     })),
     edges: graph.edges,
+  };
+}
+
+function cloneMainSkill(mainSkill: MainSkill): MainSkill {
+  return { ...mainSkill };
+}
+
+function cloneNodes(nodes: Skill[]): Skill[] {
+  return nodes.map((node) => ({
+    ...node,
+    courses: node.courses.map((course) => ({
+      ...course,
+      learningTimeInfo: course.learningTimeInfo
+        ? { ...course.learningTimeInfo }
+        : null,
+    })),
+    books: node.books.map((book) => ({ ...book })),
+    articles: node.articles.map((article) => ({
+      ...article,
+      tags: [...article.tags],
+    })),
+  }));
+}
+
+function cloneEdges(edges: SkillsRelation[]): SkillsRelation[] {
+  return edges.map((edge) => ({ ...edge }));
+}
+
+function buildGraphSnapshotData(graphData: BuiltGraphData): BuiltGraphData & {
+  initialMainSkill: MainSkill;
+  initialNodes: Skill[];
+  initialEdges: SkillsRelation[];
+} {
+  return {
+    mainSkill: cloneMainSkill(graphData.mainSkill),
+    nodes: cloneNodes(graphData.nodes),
+    edges: cloneEdges(graphData.edges),
+    initialMainSkill: cloneMainSkill(graphData.mainSkill),
+    initialNodes: cloneNodes(graphData.nodes),
+    initialEdges: cloneEdges(graphData.edges),
+  };
+}
+
+function mapInitialGraphResponse(graph: GraphWithData): GraphResponse {
+  return {
+    ...mapGraphResponse(graph),
+    mainSkill: graph.initialMainSkill,
+    nodes: graph.initialNodes,
+    edges: graph.initialEdges,
   };
 }
 
@@ -337,6 +392,13 @@ export async function getUserGraph(
   return mapGraphResponse(await findUserGraph(userId, graphId));
 }
 
+export async function getInitialUserGraph(
+  userId: string,
+  graphId: string
+): Promise<GraphResponse> {
+  return mapInitialGraphResponse(await findUserGraph(userId, graphId));
+}
+
 export async function createOrLoadUserGraph(params: {
   userId: string;
   professionTitle: string;
@@ -363,7 +425,7 @@ export async function createOrLoadUserGraph(params: {
     return mapGraphResponse(existingGraph as GraphWithData);
   }
 
-  const graphData = await buildGraph();
+  const graphData = buildGraphSnapshotData(await buildGraph());
   const graph = existingGraph
     ? await prisma.graph.update({
         where: { id: existingGraph.id },
@@ -379,6 +441,25 @@ export async function createOrLoadUserGraph(params: {
       });
 
   return mapGraphResponse(graph as GraphWithData);
+}
+
+export async function resetUserGraphToInitial(
+  userId: string,
+  graphId: string
+): Promise<GraphResponse> {
+  const graph = await findUserGraph(userId, graphId);
+  const updatedGraph = await prisma.graph.update({
+    where: { id: graph.id },
+    data: {
+      mainSkill: cloneMainSkill(graph.initialMainSkill),
+      nodes: cloneNodes(graph.initialNodes),
+      edges: cloneEdges(graph.initialEdges),
+    },
+  });
+
+  await syncCompletedUserSkills(userId);
+
+  return mapGraphResponse(updatedGraph as GraphWithData);
 }
 
 function assertStringField(

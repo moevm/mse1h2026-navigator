@@ -49,62 +49,69 @@ async function createTestUser(suffix: string) {
 }
 
 async function createTestGraph(userId: string, suffix: string) {
+  const mainSkill = {
+    id: "main",
+    title: `Backend Developer ${suffix}`,
+    description: "Backend roadmap",
+  };
+  const nodes = [
+    {
+      id: "skill-a",
+      title: "HTTP",
+      description: "",
+      isCompleted: false,
+      isRequired: true,
+      isArchieved: false,
+      priority: 1,
+      learnHours: 4,
+      courses: [],
+      books: [],
+      articles: [],
+    },
+    {
+      id: "skill-b",
+      title: "Node.js",
+      description: "",
+      isCompleted: false,
+      isRequired: true,
+      isArchieved: false,
+      priority: 2,
+      learnHours: 12,
+      courses: [],
+      books: [],
+      articles: [],
+    },
+    {
+      id: "skill-c",
+      title: "Databases",
+      description: "",
+      isCompleted: false,
+      isRequired: false,
+      isArchieved: false,
+      priority: 3,
+      learnHours: 10,
+      courses: [],
+      books: [],
+      articles: [],
+    },
+  ];
+  const edges = [
+    { fromId: "main", toId: "skill-a" },
+    { fromId: "skill-a", toId: "skill-b" },
+    { fromId: "skill-b", toId: "skill-c" },
+  ];
+
   return await prisma.graph.create({
     data: {
       userId,
       professionTitle: `Backend Developer ${suffix}`,
       normalizedProfessionTitle: `backend developer ${suffix} ${Date.now()}`,
-      mainSkill: {
-        id: "main",
-        title: `Backend Developer ${suffix}`,
-        description: "Backend roadmap",
-      },
-      nodes: [
-        {
-          id: "skill-a",
-          title: "HTTP",
-          description: "",
-          isCompleted: false,
-          isRequired: true,
-          isArchieved: false,
-          priority: 1,
-          learnHours: 4,
-          courses: [],
-          books: [],
-          articles: [],
-        },
-        {
-          id: "skill-b",
-          title: "Node.js",
-          description: "",
-          isCompleted: false,
-          isRequired: true,
-          isArchieved: false,
-          priority: 2,
-          learnHours: 12,
-          courses: [],
-          books: [],
-          articles: [],
-        },
-        {
-          id: "skill-c",
-          title: "Databases",
-          description: "",
-          isCompleted: false,
-          isRequired: false,
-          isArchieved: false,
-          priority: 3,
-          learnHours: 10,
-          courses: [],
-          books: [],
-          articles: [],
-        },
-      ],
-      edges: [
-        { fromId: "main", toId: "skill-a" },
-        { fromId: "skill-a", toId: "skill-b" },
-        { fromId: "skill-b", toId: "skill-c" },
-      ],
+      mainSkill,
+      nodes,
+      edges,
+      initialMainSkill: mainSkill,
+      initialNodes: nodes,
+      initialEdges: edges,
     },
   });
 }
@@ -150,6 +157,8 @@ describe("skill graph GraphQL integration", () => {
             professionTitle
             nodes { id title }
             edges { fromId toId }
+            initialNodes { id title }
+            initialEdges { fromId toId }
           }
         }
       `,
@@ -167,6 +176,10 @@ describe("skill graph GraphQL integration", () => {
       "Backend Developer"
     );
     expect(response.body.data.createOrLoadGraph.nodes).toHaveLength(2);
+    expect(response.body.data.createOrLoadGraph.initialNodes).toHaveLength(2);
+    expect(response.body.data.createOrLoadGraph.initialEdges).toEqual(
+      response.body.data.createOrLoadGraph.edges
+    );
   });
 
   it("loads only graphs owned by authenticated user", async () => {
@@ -324,6 +337,71 @@ describe("skill graph GraphQL integration", () => {
           edge.fromId === createdNode.id || edge.toId === createdNode.id
       )
     ).toBe(false);
+  });
+
+  it("keeps initial graph immutable and resets current graph to it", async () => {
+    const user = await createTestUser("initial-reset");
+    const graph = await createTestGraph(user.id, "initial-reset");
+
+    const addNodeResponse = await gql({
+      userId: user.id,
+      query: `
+        mutation AddGraphNode($graphId: String!, $input: CreateGraphNodeInput!) {
+          addGraphNode(graphId: $graphId, input: $input) {
+            nodes { id title }
+            initialNodes { id title }
+          }
+        }
+      `,
+      variables: { graphId: graph.id, input: { title: "Docker" } },
+    });
+
+    expect(addNodeResponse.body.errors).toBeUndefined();
+    expect(addNodeResponse.body.data.addGraphNode.nodes).toHaveLength(4);
+    expect(addNodeResponse.body.data.addGraphNode.initialNodes).toHaveLength(3);
+
+    const initialResponse = await gql({
+      userId: user.id,
+      query: `
+        query InitialSavedGraph($graphId: String!) {
+          initialSavedGraph(graphId: $graphId) {
+            nodes { id title }
+            edges { fromId toId }
+          }
+        }
+      `,
+      variables: { graphId: graph.id },
+    });
+
+    expect(initialResponse.body.errors).toBeUndefined();
+    expect(
+      initialResponse.body.data.initialSavedGraph.nodes.map(
+        (node: { title: string }) => node.title
+      )
+    ).toEqual(["HTTP", "Node.js", "Databases"]);
+
+    const resetResponse = await gql({
+      userId: user.id,
+      query: `
+        mutation ResetGraphToInitial($graphId: String!) {
+          resetGraphToInitial(graphId: $graphId) {
+            nodes { id title }
+            edges { fromId toId }
+            initialNodes { id title }
+            initialEdges { fromId toId }
+          }
+        }
+      `,
+      variables: { graphId: graph.id },
+    });
+
+    expect(resetResponse.body.errors).toBeUndefined();
+    expect(resetResponse.body.data.resetGraphToInitial.nodes).toEqual(
+      resetResponse.body.data.resetGraphToInitial.initialNodes
+    );
+    expect(resetResponse.body.data.resetGraphToInitial.edges).toEqual(
+      resetResponse.body.data.resetGraphToInitial.initialEdges
+    );
   });
 
   it("returns a bounded subgraph around selected node", async () => {

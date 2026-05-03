@@ -43,6 +43,9 @@ model Graph {
   mainSkill                 MainSkill
   nodes                     Skill[]
   edges                     SkillsRelation[]
+  initialMainSkill          MainSkill
+  initialNodes              Skill[]
+  initialEdges              SkillsRelation[]
   createdAt                 DateTime         @default(now())
   updatedAt                 DateTime         @updatedAt
 
@@ -53,6 +56,10 @@ model Graph {
 `mainSkill` — целевая профессия.  
 `nodes` — навыки.  
 `edges` — зависимости между навыками.
+
+Поля `mainSkill`, `nodes` и `edges` являются текущей редактируемой версией графа. Пользовательские изменения узлов и связей записываются только в эти поля.
+
+Поля `initialMainSkill`, `initialNodes` и `initialEdges` хранят исходный полный граф, полученный сразу после построения. Этот исходный снимок не меняется при редактировании. При `forceRegenerate = true` граф строится заново, поэтому перезаписываются и текущая версия, и исходный снимок.
 
 Граф уникален для пары `userId + normalizedProfessionTitle`.
 
@@ -140,6 +147,21 @@ query SavedGraph($graphId: String!) {
 ```
 
 Если граф принадлежит другому пользователю, обработчик вернет ошибку `Graph not found`.
+
+### Получить исходный снимок графа
+
+```graphql
+query InitialSavedGraph($graphId: String!) {
+  initialSavedGraph(graphId: $graphId) {
+    id
+    professionTitle
+    nodes { id title }
+    edges { fromId toId }
+  }
+}
+```
+
+Запрос возвращает исходный вид графа. В ответе поля `nodes` и `edges` соответствуют сохраненным `initialNodes` и `initialEdges`.
 
 ### Обновить узел
 
@@ -267,6 +289,22 @@ mutation DeleteGraphEdge($graphId: String!, $input: GraphEdgeInput!) {
 }
 ```
 
+### Сбросить граф к исходному виду
+
+```graphql
+mutation ResetGraphToInitial($graphId: String!) {
+  resetGraphToInitial(graphId: $graphId) {
+    id
+    nodes { id title }
+    edges { fromId toId }
+    initialNodes { id title }
+    initialEdges { fromId toId }
+  }
+}
+```
+
+Мутация копирует `initialMainSkill`, `initialNodes` и `initialEdges` в текущие поля `mainSkill`, `nodes` и `edges`. После сброса список изученных навыков пользователя пересчитывается по текущим графам.
+
 ### Получить подграф
 
 ```graphql
@@ -351,6 +389,34 @@ DATABASE_URL='mongodb://localhost:27017/navigator?replicaSet=rs0&directConnectio
 
 Демонстрационный сценарий использует реальную MongoDB, но подменяет только graph-data-service, чтобы вывод был стабильным и не зависел от внешних API.
 
+## Демонстрационный сценарий сохранения графа
+
+Для ручного просмотра реального построения, записи в MongoDB и повторной загрузки добавлен файл:
+
+```text
+backend/src/scripts/graphBuildPersistenceDemo.ts
+```
+
+Он выводит подробный журнал:
+
+- GraphQL-ответ после построения графа;
+- документ `Graph`, прочитанный напрямую из MongoDB через Prisma;
+- сравнение текущих `nodes/edges` с исходными `initialNodes/initialEdges`;
+- изменение текущего графа;
+- доказательство, что исходный снимок не изменился;
+- сброс текущего графа к исходному виду;
+- повторную загрузку через `createOrLoadGraph(forceRegenerate: false)`;
+- очистку демонстрационных данных.
+
+Этот сценарий не подменяет graph-data-service и вызывает реальную генерацию с `isMock: false`. Перед запуском должен быть доступен graph-data-service с рабочими переменными окружения, включая `HF_TOKEN` и `HF_MODEL_NAME`.
+
+Запуск:
+
+```bash
+cd backend
+DATABASE_URL='mongodb://localhost:27017/navigator?replicaSet=rs0&directConnection=true' JWT_SECRET='test-secret' bun run demo:graph-build-persistence
+```
+
 ## Что покрывают тесты
 
 `backend/src/graphql/resolvers/skillGraph.resolver.test.ts` проверяет:
@@ -363,4 +429,6 @@ DATABASE_URL='mongodb://localhost:27017/navigator?replicaSet=rs0&directConnectio
 - добавление связи;
 - запрет дубликатов связей;
 - удаление узла с каскадным удалением ребер;
-- получение подграфа.
+- получение подграфа;
+- неизменность исходного снимка;
+- сброс текущего графа к исходному виду.

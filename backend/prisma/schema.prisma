@@ -29,6 +29,9 @@ model Graph {
   mainSkill                 MainSkill
   nodes                     Skill[]
   edges                     SkillsRelation[]
+  initialMainSkill          MainSkill
+  initialNodes              Skill[]
+  initialEdges              SkillsRelation[]
   createdAt                 DateTime        @default(now())
   updatedAt                 DateTime        @updatedAt
 
