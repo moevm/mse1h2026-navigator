@@ -8,7 +8,34 @@ export interface CreateGraphRequest {
 }
 
 export interface UpdateGraphNodeRequest {
+  title?: string;
+  description?: string;
   isCompleted?: boolean;
+  isRequired?: boolean;
+  isArchieved?: boolean;
+  priority?: number;
+  learnHours?: number;
+  courses?: Course[];
+  books?: Book[];
+  articles?: Article[];
+}
+
+export interface CreateGraphNodeRequest {
+  title?: string;
+  description?: string;
+  isCompleted?: boolean;
+  isRequired?: boolean;
+  isArchieved?: boolean;
+  priority?: number;
+  learnHours?: number;
+  courses?: Course[];
+  books?: Book[];
+  articles?: Article[];
+}
+
+export interface GraphEdgeRequest {
+  fromId?: string;
+  toId?: string;
 }
 
 export interface GraphDataServiceResponse {
@@ -27,6 +54,11 @@ export interface GraphResponse {
   edges: SkillsRelation[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface UpdateGraphNodeResponse {
+  node: Skill;
+  skills: string[];
 }
 
 export interface GraphListItemResponse {

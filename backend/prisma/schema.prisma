@@ -35,6 +35,40 @@ model Graph {
   @@unique([userId, normalizedProfessionTitle])
 }
 
+model CourseResource {
+  id                   String            @id @default(auto()) @map("_id") @db.ObjectId
+  source               String
+  provider             String
+  externalId           String
+  title                String
+  description          String
+  link                 String
+  image                String?
+  normalizedSkillTitle String
+  learningTimeInfo     LearningTimeInfo?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@unique([source, externalId])
+  @@index([normalizedSkillTitle])
+}
+
+model CompanyResource {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  source             String
+  externalId         String
+  name               String
+  url                String?
+  alternateUrl       String?
+  relatedProfessions String[]
+  relatedSkills      String[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([source, externalId])
+  @@index([name])
+}
+
 type MainSkill {
   id          String
   title       String

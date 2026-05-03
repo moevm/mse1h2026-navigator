@@ -118,6 +118,7 @@ export class SkillGraphService {
     book.link = `https://openlibrary.org/search?q=${encodeURIComponent(title)}`;
 
     const article = new ArticleGql();
+    article.id = `article-${id}`;
     article.title = `Введение в ${title}`;
     article.description = `Обзорная статья про ${title} для начинающих`;
     article.link = `https://habr.com/ru/search/?q=${encodeURIComponent(title)}`;
