@@ -33,6 +33,7 @@ async function bootstrap() {
   app.use("/habr", habrRouter);
   app.use("/wikipedia", wikipediaRouter);
   app.use("/auth", authRouter);
+  app.use("/graphs", graphsRouter);
 
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
