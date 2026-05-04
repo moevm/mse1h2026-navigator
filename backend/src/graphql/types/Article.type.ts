@@ -3,6 +3,9 @@ import { Field, Float, ObjectType } from "type-graphql";
 @ObjectType()
 export class ArticleGql {
   @Field()
+  id: string = "";
+
+  @Field()
   title: string = "";
 
   @Field()
