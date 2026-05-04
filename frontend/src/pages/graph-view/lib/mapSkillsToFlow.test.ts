@@ -60,4 +60,27 @@ describe("mapSkillsToFlow", () => {
       }),
     ]);
   });
+
+  it("initializes every mapped node at the origin before layout", () => {
+    const flow = mapSkillsToFlow(mainSkill, [reactSkill, typescriptSkill], []);
+
+    expect(flow.nodes.map((node) => node.position)).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+    ]);
+  });
+
+  it("preserves duplicate relations as distinct edge entries with stable ids", () => {
+    const flow = mapSkillsToFlow(mainSkill, [reactSkill, typescriptSkill], [
+      { fromId: "react", toId: "typescript" },
+      { fromId: "react", toId: "typescript" },
+    ]);
+
+    expect(flow.edges).toHaveLength(2);
+    expect(flow.edges.map((edge) => edge.id)).toEqual([
+      "react-typescript",
+      "react-typescript",
+    ]);
+  });
 });
