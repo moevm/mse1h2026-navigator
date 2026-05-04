@@ -6,14 +6,17 @@ import {
   GitBranch,
   Loader2,
   LogIn,
+  Plus,
   RefreshCw,
   Search,
+  Trash2,
   User,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createOrLoadGraph, listSavedGraphs } from "@/api/graphs";
+import { Badge } from "@/components/ui/badge";
+import { createOrLoadGraph, deleteGraph, listSavedGraphs } from "@/api/graphs";
 import type { AuthResponse, GraphListItem } from "@/api/types";
-import { parseTechnologyList } from "@/lib/parseTechnologyList";
 
 const YANDEX_CLIENT_ID = import.meta.env.VITE_YANDEX_CLIENT_ID;
 const YANDEX_REDIRECT_URI = import.meta.env.VITE_YANDEX_REDIRECT_URI;
@@ -55,11 +58,14 @@ export const MainPage = () => {
     getStoredUser(),
   );
   const [professionTitle, setProfessionTitle] = useState("");
-  const [initialTechnologiesInput, setInitialTechnologiesInput] = useState("");
+  const [vacancyTitle, setVacancyTitle] = useState("");
+  const [technologyDraft, setTechnologyDraft] = useState("");
+  const [initialTechnologies, setInitialTechnologies] = useState<string[]>([]);
   const [isMock, setIsMock] = useState(false);
   const [graphs, setGraphs] = useState<GraphListItem[]>([]);
   const [isLoadingGraphs, setIsLoadingGraphs] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [deletingGraphId, setDeletingGraphId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const sortedGraphs = useMemo(
@@ -98,6 +104,26 @@ export const MainPage = () => {
     }
   }, []);
 
+  const addTechnology = () => {
+    const technology = technologyDraft.trim().replace(/\s+/g, " ");
+    if (!technology) {
+      return;
+    }
+
+    setInitialTechnologies((items) =>
+      items.some((item) => item.toLowerCase() === technology.toLowerCase())
+        ? items
+        : [...items, technology],
+    );
+    setTechnologyDraft("");
+  };
+
+  const removeTechnology = (technology: string) => {
+    setInitialTechnologies((items) =>
+      items.filter((item) => item !== technology),
+    );
+  };
+
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -111,11 +137,13 @@ export const MainPage = () => {
     setError(null);
 
     try {
-      const initialTechnologies = parseTechnologyList(initialTechnologiesInput);
+      const normalizedVacancyTitle = vacancyTitle.trim();
       const graph = await createOrLoadGraph({
         professionTitle: title,
+        vacancyTitle: normalizedVacancyTitle || undefined,
         initialTechnologies,
-        forceRegenerate: initialTechnologies.length > 0,
+        forceRegenerate:
+          initialTechnologies.length > 0 || normalizedVacancyTitle.length > 0,
         isMock,
       });
       navigate(`/graph/${graph.id}`);
@@ -132,6 +160,27 @@ export const MainPage = () => {
     localStorage.removeItem("user");
     setUser(null);
     setGraphs([]);
+  };
+
+  const handleDeleteGraph = async (graph: GraphListItem) => {
+    const confirmed = window.confirm(
+      `Удалить граф "${graph.professionTitle}" полностью?`,
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingGraphId(graph.id);
+    setError(null);
+
+    try {
+      await deleteGraph(graph.id);
+      setGraphs((items) => items.filter((item) => item.id !== graph.id));
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Не удалось удалить граф");
+    } finally {
+      setDeletingGraphId(null);
+    }
   };
 
   if (!user) {
@@ -186,27 +235,76 @@ export const MainPage = () => {
 
           <form onSubmit={handleCreate} className="mt-4 space-y-4">
             <label className="block text-sm font-medium text-slate-700">
-              Название вакансии или профессии
+              Профессия для графа
               <input
                 value={professionTitle}
                 onChange={(event) => setProfessionTitle(event.target.value)}
                 className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-slate-600"
-                placeholder="Например, Frontend React developer"
+                placeholder="Например, Frontend developer"
               />
             </label>
 
             <label className="block text-sm font-medium text-slate-700">
-              Стартовые технологии
-              <textarea
-                value={initialTechnologiesInput}
-                onChange={(event) => setInitialTechnologiesInput(event.target.value)}
-                className="mt-1 min-h-24 w-full resize-none rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-slate-600"
-                placeholder="Например: React, TypeScript, GraphQL"
+              Название вакансии на HeadHunter
+              <input
+                value={vacancyTitle}
+                onChange={(event) => setVacancyTitle(event.target.value)}
+                className="mt-1 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-slate-600"
+                placeholder="Например, React Frontend разработчик"
               />
               <span className="mt-1 block text-xs font-normal text-slate-500">
-                Можно через запятую или с новой строки.
+                Из найденных вакансий подтянутся key skills и попадут в граф.
               </span>
             </label>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="technology-draft"
+                className="block text-sm font-medium text-slate-700"
+              >
+                Стартовые технологии
+              </label>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+                <input
+                  id="technology-draft"
+                  value={technologyDraft}
+                  onChange={(event) => setTechnologyDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      addTechnology();
+                    }
+                  }}
+                  className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-slate-600"
+                  placeholder="Например, React"
+                />
+                <Button type="button" variant="outline" onClick={addTechnology}>
+                  <Plus />
+                  Добавить
+                </Button>
+              </div>
+              {initialTechnologies.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {initialTechnologies.map((technology) => (
+                    <Badge
+                      key={technology}
+                      variant="outline"
+                      className="gap-1 border-slate-300 px-2 py-1 text-slate-700"
+                    >
+                      {technology}
+                      <button
+                        type="button"
+                        onClick={() => removeTechnology(technology)}
+                        className="rounded-full text-slate-500 outline-none transition hover:text-slate-950 focus-visible:ring-2 focus-visible:ring-slate-500"
+                        aria-label={`Удалить ${technology}`}
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
               <label className="flex h-10 items-center gap-2 rounded-md border border-slate-200 px-3 text-sm text-slate-700">
@@ -253,24 +351,37 @@ export const MainPage = () => {
 
           <div className="mt-4 space-y-2">
             {sortedGraphs.map((graph) => (
-              <Link
+              <div
                 key={graph.id}
-                to={`/graph/${graph.id}`}
-                className="grid gap-2 rounded-md border border-slate-200 px-3 py-3 transition hover:border-slate-400 hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_auto]"
+                className="grid gap-2 rounded-md border border-slate-200 px-3 py-3 transition hover:border-slate-400 hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_auto_auto]"
               >
-                <span className="min-w-0">
+                <Link to={`/graph/${graph.id}`} className="min-w-0">
                   <span className="block truncate text-sm font-medium text-slate-900">
                     {graph.professionTitle}
                   </span>
                   <span className="mt-1 block truncate text-xs text-slate-500">
                     {graph.id}
                   </span>
-                </span>
+                </Link>
                 <span className="flex items-center gap-3 text-xs text-slate-500">
                   {formatDate(graph.updatedAt)}
                   <ArrowRight className="size-4" />
                 </span>
-              </Link>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  disabled={deletingGraphId === graph.id}
+                  onClick={() => void handleDeleteGraph(graph)}
+                  aria-label={`Удалить граф ${graph.professionTitle}`}
+                >
+                  {deletingGraphId === graph.id ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <Trash2 />
+                  )}
+                </Button>
+              </div>
             ))}
 
             {!isLoadingGraphs && !sortedGraphs.length && (

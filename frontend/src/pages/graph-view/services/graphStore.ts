@@ -12,6 +12,8 @@ import type {
 import { mapSkillsToFlow } from "../lib/mapSkillsToFlow";
 import { layoutGraph } from "../lib/layoutGraph";
 import { resolveHandles } from "../lib/resolveHandles";
+import { filterGraphSkills } from "../lib/filterGraphSkills";
+import { applyCollapsedSubgraphs } from "../lib/applyCollapsedSubgraphs";
 
 export interface GraphFilters {
   query: string;
@@ -27,6 +29,7 @@ export class GraphStore {
   private mainSkill_: MainSkill | null = null;
   private graphEdges_: GraphResponse["edges"] = [];
   private savedGraphs_: GraphListItem[] = [];
+  private collapsedNodeIds_: Set<string> = new Set();
   private filters_: GraphFilters = {
     query: "",
     requiredOnly: false,
@@ -47,6 +50,7 @@ export class GraphStore {
       | "mainSkill_"
       | "graphEdges_"
       | "savedGraphs_"
+      | "collapsedNodeIds_"
       | "filters_"
       | "flowNodes_"
       | "flowEdges_"
@@ -55,6 +59,7 @@ export class GraphStore {
       mainSkill_: observable.ref,
       graphEdges_: observable.ref,
       savedGraphs_: observable.ref,
+      collapsedNodeIds_: observable.ref,
       filters_: observable.ref,
       flowNodes_: observable.ref,
       flowEdges_: observable.ref,
@@ -123,6 +128,25 @@ export class GraphStore {
 
   public onNodesChange = (changes: NodeChange[]) => {
     this.flowNodes_ = applyNodeChanges(changes, this.flowNodes_);
+  };
+
+  public toggleCollapsedSubgraph = (nodeId: string): void => {
+    const nextCollapsedNodeIds = new Set(this.collapsedNodeIds_);
+
+    if (nextCollapsedNodeIds.has(nodeId)) {
+      nextCollapsedNodeIds.delete(nodeId);
+    } else {
+      const hasVisibleChildren = this.flowEdges_.some(
+        (edge) => edge.source === nodeId,
+      );
+      if (!hasVisibleChildren) {
+        return;
+      }
+      nextCollapsedNodeIds.add(nodeId);
+    }
+
+    this.collapsedNodeIds_ = nextCollapsedNodeIds;
+    void this.rebuildFlow();
   };
 
   public setFilter = <TKey extends keyof GraphFilters>(
@@ -385,6 +409,10 @@ export class GraphStore {
     this.mainSkill_ = mainSkill;
     this.skills_ = nodes;
     this.graphEdges_ = edges;
+    const validNodeIds = new Set([mainSkill.id, ...nodes.map((node) => node.id)]);
+    this.collapsedNodeIds_ = new Set(
+      [...this.collapsedNodeIds_].filter((nodeId) => validNodeIds.has(nodeId)),
+    );
     await this.rebuildFlow();
   };
 
@@ -395,7 +423,30 @@ export class GraphStore {
       return;
     }
 
-    const visibleSkills = this.getFilteredSkills();
+    const filteredSkills = filterGraphSkills(
+      this.mainSkill_,
+      this.skills_,
+      this.graphEdges_,
+      this.filters_,
+    );
+    const collapsedSubgraphs = applyCollapsedSubgraphs(
+      this.mainSkill_,
+      filteredSkills,
+      this.graphEdges_,
+      this.collapsedNodeIds_,
+    );
+    const mainSkill = {
+      ...this.mainSkill_,
+      isCollapsed: this.collapsedNodeIds_.has(this.mainSkill_.id),
+      hiddenDescendantsCount:
+        collapsedSubgraphs.hiddenDescendantCountById.get(this.mainSkill_.id) ?? 0,
+    };
+    const visibleSkills = collapsedSubgraphs.visibleSkills.map((skill) => ({
+      ...skill,
+      isCollapsed: this.collapsedNodeIds_.has(skill.id),
+      hiddenDescendantsCount:
+        collapsedSubgraphs.hiddenDescendantCountById.get(skill.id) ?? 0,
+    }));
     const visibleIds = new Set([
       this.mainSkill_.id,
       ...visibleSkills.map((skill) => skill.id),
@@ -403,7 +454,7 @@ export class GraphStore {
     const visibleEdges = this.graphEdges_.filter(
       (edge) => visibleIds.has(edge.fromId) && visibleIds.has(edge.toId),
     );
-    const flow = mapSkillsToFlow(this.mainSkill_, visibleSkills, visibleEdges);
+    const flow = mapSkillsToFlow(mainSkill, visibleSkills, visibleEdges);
     const layouted = await layoutGraph(flow.nodes, flow.edges);
     this.flowNodes_ = layouted.nodes;
     this.flowEdges_ = resolveHandles(layouted.nodes, layouted.edges).map((edge) => ({
@@ -412,28 +463,6 @@ export class GraphStore {
       style: { stroke: "#64748b", strokeWidth: 1.8 },
     }));
   };
-
-  private getFilteredSkills(): Skill[] {
-    const query = this.filters_.query.trim().toLowerCase();
-    return this.skills_.filter((skill) => {
-      if (this.filters_.requiredOnly && !skill.isRequired) {
-        return false;
-      }
-      if (this.filters_.incompleteOnly && skill.isCompleted) {
-        return false;
-      }
-      if (this.filters_.minHours > 0 && skill.learnHours < this.filters_.minHours) {
-        return false;
-      }
-      if (
-        query &&
-        !`${skill.title} ${skill.description}`.toLowerCase().includes(query)
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }
 
   private syncStoredUserSkills = (skills: string[]): void => {
     const raw = localStorage.getItem("user");

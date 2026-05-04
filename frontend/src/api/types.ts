@@ -35,6 +35,7 @@ export interface GraphListItem {
 
 export interface GraphSearchParams {
   professionTitle: string;
+  vacancyTitle?: string;
   initialTechnologies?: string[];
   isMock?: boolean;
   forceRegenerate?: boolean;

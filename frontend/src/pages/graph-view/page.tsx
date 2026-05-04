@@ -22,6 +22,7 @@ import {
   RefreshCw,
   Search,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 import "@xyflow/react/dist/style.css";
 import { graphConfig } from "./config/graphSettings";
@@ -95,6 +96,11 @@ const GraphFlow = observer(() => {
 
   const handleNodeClick: NodeMouseHandler = (_, node) => {
     nodeModalStore.open(node);
+  };
+
+  const handleNodeContextMenu: NodeMouseHandler = (event, node) => {
+    event.preventDefault();
+    graphStore.toggleCollapsedSubgraph(node.id);
   };
 
   const handleEdgeClick: EdgeMouseHandler = (_, edge) => {
@@ -256,17 +262,6 @@ const GraphFlow = observer(() => {
               <Filter className="size-4 text-slate-500" />
               Фильтры
             </h2>
-            <label className="relative block">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-              <input
-                value={graphStore.filters.query}
-                onChange={(event) =>
-                  graphStore.setFilter("query", event.target.value)
-                }
-                className="h-9 w-full rounded-md border border-slate-300 px-9 text-sm outline-none focus:border-slate-600"
-                placeholder="Поиск по навыкам"
-              />
-            </label>
             <div className="grid grid-cols-2 gap-2">
               <label className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm">
                 <input
@@ -384,6 +379,32 @@ const GraphFlow = observer(() => {
       </aside>
 
       <main className="relative min-w-0">
+        {graphStore.hasGraph && (
+          <div className="absolute left-1/2 top-4 z-10 w-[min(560px,calc(100%-32px))] -translate-x-1/2">
+            <label className="relative block rounded-md border border-slate-200 bg-white/95 shadow-sm backdrop-blur">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+              <input
+                value={graphStore.filters.query}
+                onChange={(event) =>
+                  graphStore.setFilter("query", event.target.value)
+                }
+                className="h-11 w-full rounded-md bg-transparent px-10 pr-20 text-sm outline-none focus:ring-2 focus:ring-slate-500/25"
+                placeholder="Найти и показать подграф"
+              />
+              {graphStore.filters.query && (
+                <button
+                  type="button"
+                  onClick={() => graphStore.setFilter("query", "")}
+                  className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                  aria-label="Очистить поиск"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
+            </label>
+          </div>
+        )}
+
         {graphStore.error && (
           <div className="absolute bottom-4 left-4 right-4 z-10 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm">
             {graphStore.error}
@@ -400,6 +421,7 @@ const GraphFlow = observer(() => {
             onConnect={(connection) => void graphStore.connectNodes(connection)}
             onNodesChange={graphStore.onNodesChange}
             onNodeClick={handleNodeClick}
+            onNodeContextMenu={handleNodeContextMenu}
             onEdgeClick={handleEdgeClick}
             defaultViewport={defaultViewport}
             fitView

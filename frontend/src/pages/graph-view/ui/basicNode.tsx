@@ -1,13 +1,14 @@
 import { memo } from "react";
 import type { FC } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { ChevronRight } from "lucide-react";
 import type { BasicFlowNode } from "../types/nodes";
 import { SourceHandleTypes, TargetHandleTypes } from "../config/handleTypes";
 
 export const BasicNode: FC<NodeProps<BasicFlowNode>> = memo(({ data }) => {
   return (
     <div
-      className={`flex aspect-square min-h-28 w-32 items-center justify-center rounded-md border p-3 text-center text-sm shadow-sm transition ${
+      className={`relative flex aspect-square min-h-28 w-32 cursor-pointer items-center justify-center rounded-md border p-3 text-center text-sm shadow-sm transition ${
         data.isCompleted
           ? "border-emerald-200 bg-emerald-50 text-emerald-950"
           : data.isRequired
@@ -61,6 +62,13 @@ export const BasicNode: FC<NodeProps<BasicFlowNode>> = memo(({ data }) => {
         <p>{data.title}</p>
         <p className="mt-1 text-[10px] text-slate-500">{data.learnHours} ч</p>
       </div>
+
+      {data.isCollapsed && data.hiddenDescendantsCount ? (
+        <span className="absolute bottom-2 right-2 inline-flex h-6 min-w-6 items-center justify-center gap-0.5 rounded-md bg-slate-900 px-1.5 text-[11px] font-semibold text-white shadow-sm">
+          <ChevronRight className="size-3" />
+          {data.hiddenDescendantsCount}
+        </span>
+      ) : null}
     </div>
   );
 });

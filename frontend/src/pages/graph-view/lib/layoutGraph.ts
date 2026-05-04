@@ -3,6 +3,8 @@ import type { GraphNode } from "../types/nodes";
 
 const ROW_GAP = 190;
 const COLUMN_GAP = 280;
+const LAYER_ROW_GAP = 150;
+const MAX_NODES_PER_LAYER_ROW = 5;
 const collator = new Intl.Collator("en", {
   numeric: true,
   sensitivity: "base",
@@ -37,6 +39,30 @@ const compareByWeight = (a: RankedNode, b: RankedNode): number => {
   return collator.compare(a.id, b.id);
 };
 
+const hasPath = (
+  outgoing: Map<string, string[]>,
+  sourceId: string,
+  targetId: string,
+): boolean => {
+  const visited = new Set<string>();
+  const stack = [sourceId];
+
+  while (stack.length > 0) {
+    const currentId = stack.pop()!;
+    if (currentId === targetId) {
+      return true;
+    }
+    if (visited.has(currentId)) {
+      continue;
+    }
+
+    visited.add(currentId);
+    stack.push(...(outgoing.get(currentId) ?? []));
+  }
+
+  return false;
+};
+
 export async function layoutGraph(
   nodes: GraphNode[],
   edges: Edge[],
@@ -58,8 +84,30 @@ export async function layoutGraph(
     indegree.set(id, 0);
   }
 
-  for (const edge of edges) {
-    if (!rankedById.has(edge.source) || !rankedById.has(edge.target)) {
+  const validEdges = edges
+    .filter(
+      (edge) =>
+        rankedById.has(edge.source) &&
+        rankedById.has(edge.target) &&
+        edge.source !== edge.target,
+    )
+    .sort((left, right) => {
+      const sourceCompare = compareByWeight(
+        rankedById.get(left.source)!,
+        rankedById.get(right.source)!,
+      );
+      if (sourceCompare !== 0) {
+        return sourceCompare;
+      }
+
+      return compareByWeight(
+        rankedById.get(left.target)!,
+        rankedById.get(right.target)!,
+      );
+    });
+
+  for (const edge of validEdges) {
+    if (hasPath(outgoing, edge.target, edge.source)) {
       continue;
     }
 
@@ -112,15 +160,6 @@ export async function layoutGraph(
 
     for (const childId of outgoing.get(id) ?? []) {
       depth.set(childId, Math.max(depth.get(childId) ?? 0, currentDepth + 1));
-    }
-  }
-
-  if (unresolved.length > 0) {
-    let fallbackDepth = Math.max(...depth.values()) + 1;
-
-    for (const id of unresolved) {
-      depth.set(id, fallbackDepth);
-      fallbackDepth += 1;
     }
   }
 
@@ -181,17 +220,32 @@ export async function layoutGraph(
   }
 
   const positionById = new Map<string, { x: number; y: number }>();
+  let yOffset = 0;
 
-  for (const [layerIndex] of orderedLayers) {
-    const sortedLayer = layers.get(layerIndex) ?? [];
-    const totalWidth = (sortedLayer.length - 1) * COLUMN_GAP;
+  for (const [, sortedLayerIds] of orderedLayers) {
+    const sortedLayer = sortedLayerIds;
+    const rowCount = Math.max(
+      1,
+      Math.ceil(sortedLayer.length / MAX_NODES_PER_LAYER_ROW),
+    );
 
     sortedLayer.forEach((id, index) => {
+      const rowIndex = Math.floor(index / MAX_NODES_PER_LAYER_ROW);
+      const rowStart = rowIndex * MAX_NODES_PER_LAYER_ROW;
+      const rowLength = Math.min(
+        MAX_NODES_PER_LAYER_ROW,
+        sortedLayer.length - rowStart,
+      );
+      const indexInRow = index - rowStart;
+      const totalWidth = (rowLength - 1) * COLUMN_GAP;
+
       positionById.set(id, {
-        x: index * COLUMN_GAP - totalWidth / 2,
-        y: layerIndex * ROW_GAP,
+        x: indexInRow * COLUMN_GAP - totalWidth / 2,
+        y: yOffset + rowIndex * LAYER_ROW_GAP,
       });
     });
+
+    yOffset += ROW_GAP + (rowCount - 1) * LAYER_ROW_GAP;
   }
 
   return {

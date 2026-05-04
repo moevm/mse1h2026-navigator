@@ -149,6 +149,18 @@ export async function getSavedGraph(graphId: string): Promise<GraphResponse> {
   return data.savedGraph;
 }
 
+export async function deleteGraph(graphId: string): Promise<boolean> {
+  const data = await gql<{ deleteGraph: boolean }>(
+    `
+      mutation DeleteGraph($graphId: String!) {
+        deleteGraph(graphId: $graphId)
+      }
+    `,
+    { graphId },
+  );
+  return data.deleteGraph;
+}
+
 export async function updateGraphNode(
   graphId: string,
   nodeId: string,

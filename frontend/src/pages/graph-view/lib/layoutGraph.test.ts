@@ -60,15 +60,39 @@ describe("layoutGraph", () => {
     expect(result.edges).toEqual([expect.objectContaining({ id: "root-leaf" })]);
   });
 
-  it("still assigns deterministic positions when the graph contains a cycle", async () => {
+  it("keeps cyclic graphs compact by ignoring feedback edges for ranking", async () => {
     const { nodes } = await layoutGraph(
       [node("b"), node("a")],
       [edge("a", "b"), edge("b", "a")],
     );
 
     expect(nodes.map((item) => [item.id, item.position])).toEqual([
-      ["b", { x: 0, y: 760 }],
-      ["a", { x: 0, y: 570 }],
+      ["b", { x: 0, y: 190 }],
+      ["a", { x: 0, y: 0 }],
+    ]);
+  });
+
+  it("wraps large layers into multiple centered rows", async () => {
+    const children = Array.from({ length: 7 }, (_, index) =>
+      node(`child-${index + 1}`),
+    );
+    const { nodes } = await layoutGraph(
+      [node("root"), ...children],
+      children.map((child) => edge("root", child.id)),
+    );
+
+    const childPositions = nodes
+      .filter((item) => item.id.startsWith("child-"))
+      .map((item) => item.position);
+
+    expect(childPositions).toEqual([
+      { x: -560, y: 190 },
+      { x: -280, y: 190 },
+      { x: 0, y: 190 },
+      { x: 280, y: 190 },
+      { x: 560, y: 190 },
+      { x: -140, y: 340 },
+      { x: 140, y: 340 },
     ]);
   });
 });
