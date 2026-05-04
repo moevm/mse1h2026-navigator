@@ -1,19 +1,18 @@
-import express, { Request, Response } from "express";
+import "reflect-metadata";
 import dotenv from "dotenv";
-import { healthRouter } from "./routers/health";
-import { habrRouter } from "./routers/habr";
-import { wikipediaRouter } from "./routers/wikipedia";
+import { createApp } from "./app";
 
 dotenv.config();
 
-const app = express();
 const PORT: number = Number(process.env.PORT) || 3000;
 
-app.use(express.json());
-app.use("/health", healthRouter);
-app.use("/habr", habrRouter);
-app.use("/wikipedia", wikipediaRouter);
+async function bootstrap() {
+  const app = await createApp();
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`GraphQL playground: http://localhost:${PORT}/graphql`);
+  });
+}
+
+bootstrap();

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosHeaders } from 'axios';
 import 'dotenv/config';
-import type { VacancyDetail, VacancySearchResponse, VacancySearchParams } from '../types';
+import type { VacancyDetail, VacancySearchResponse, VacancySearchParams, EmployerSearchParams, EmployerSearchResponse } from '../types';
 
 /**
  * Класс для работы с API HeadHunter
@@ -51,5 +51,10 @@ export class HHApiWrapper {
    */
   async getVacancyDetail(vacancyId: string): Promise<VacancyDetail> {
     return this.get(`/vacancies/${vacancyId}`);
+  }
+
+
+  async getEmployers(params: EmployerSearchParams): Promise<EmployerSearchResponse> {
+    return this.get('/employers', { params });
   }
 }

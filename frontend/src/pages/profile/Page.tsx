@@ -5,38 +5,42 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, User } from "lucide-react";
-import type { AuthResponse } from "@/api/types";
+import { getCurrentUser } from "@/api/auth";
+import type { CurrentUserResponse } from "@/api/types";
 
-function getUserFromStorage(): AuthResponse | null {
+function hasStoredUser(): boolean {
   const raw = localStorage.getItem("user");
-  if (!raw) return null;
+  if (!raw) return false;
   try {
-    return JSON.parse(raw) as AuthResponse;
+    const parsed = JSON.parse(raw) as { token?: unknown };
+    return typeof parsed.token === "string";
   } catch {
-    return null;
+    return false;
   }
 }
 
 export const ProfilePage = () => {
-  const [user, setUser] = useState<AuthResponse | null>(null);
-  const [skills] = useState<string[]>(() => {
-    const raw = localStorage.getItem("skills");
-    if (!raw) return [];
-    try {
-      return JSON.parse(raw) as string[];
-    } catch {
-      return [];
-    }
-  });
+  const [user, setUser] = useState<CurrentUserResponse | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = getUserFromStorage();
-    if (!userData) {
+    if (!hasStoredUser()) {
       navigate("/");
       return;
     }
-    setUser(userData);
+
+    getCurrentUser()
+      .then((userData) => {
+        setUser(userData);
+        const raw = localStorage.getItem("user");
+        if (!raw) return;
+        const storedUser = JSON.parse(raw) as object;
+        localStorage.setItem("user", JSON.stringify({ ...storedUser, ...userData }));
+      })
+      .catch(() => {
+        localStorage.removeItem("user");
+        navigate("/");
+      });
   }, [navigate]);
 
   const handleLogout = () => {
@@ -71,7 +75,7 @@ export const ProfilePage = () => {
           <div className="mt-12">
             <p className="text-sm font-semibold mb-2">Изученные навыки:</p>
             <div className="flex items-center gap-2 flex-wrap">
-              {skills.map((skill) => (
+              {user.skills.map((skill) => (
                 <Badge key={skill} variant="secondary">
                   {skill}
                 </Badge>

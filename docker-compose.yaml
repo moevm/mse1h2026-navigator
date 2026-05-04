@@ -7,7 +7,7 @@ services:
       - mongo-data:/data/db
     command: ["--replSet", "rs0", "--bind_ip_all"]
     healthcheck:
-      test: mongosh --eval "rs.status()" --quiet
+      test: mongosh --eval "db.adminCommand('ping')" --quiet
       interval: 5s
       retries: 10
 
@@ -16,7 +16,9 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
-    command: mongosh --host mongo --eval "rs.initiate()"
+    command: >
+      mongosh --host mongo --eval
+      "try { rs.status().ok } catch (error) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }) }"
     restart: "no"
 
   backend:
@@ -26,12 +28,30 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment:
-      - DATABASE_URL=mongodb://mongo:27017/navigator?replicaSet=rs0
+      - DATABASE_URL=mongodb://mongo:27017/navigator?replicaSet=rs0&directConnection=true
+      - GRAPH_DATA_SERVICE_URL=http://graph-data-service:8000
+      - JWT_SECRET=${JWT_SECRET:-navigator-dev-secret}
     depends_on:
       mongo-init:
         condition: service_completed_successfully
+      graph-data-service:
+        condition: service_started
+
+  graph-data-service:
+    build:
+      context: ./graph-data-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: ./graph-data-service/.env
+        required: false
+    environment:
+      - APP_PORT=8000
+    restart: unless-stopped
 
 volumes:
   mongo-data:

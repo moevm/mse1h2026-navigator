@@ -150,6 +150,7 @@ export const getSkillsGraph = async (): Promise<{
         isRequired: false,
         articles: [
           {
+            id: "a-953338",
             title: "Линейная алгебра: четыре разных подхода к одной задаче",
             link: "https://habr.com/ru/articles/953338/",
             rating: 76,
