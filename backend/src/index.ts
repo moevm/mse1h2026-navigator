@@ -1,12 +1,14 @@
-import "reflect-metadata";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import "reflect-metadata";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { healthRouter } from "./routers/health";
 import { habrRouter } from "./routers/habr";
 import { wikipediaRouter } from "./routers/wikipedia";
+import { authRouter } from "./routers/auth";
+import { graphsRouter } from "./routers/graphs";
 import { createSchema } from "./graphql/schema";
 import { setupContainer } from "./container";
 
@@ -30,6 +32,7 @@ async function bootstrap() {
   app.use("/health", healthRouter);
   app.use("/habr", habrRouter);
   app.use("/wikipedia", wikipediaRouter);
+  app.use("/auth", authRouter);
 
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

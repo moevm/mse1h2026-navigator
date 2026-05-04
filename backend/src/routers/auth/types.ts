@@ -18,4 +18,15 @@ export interface AuthResponse {
   firstName: string;
   lastName: string;
   avatarUrl: string;
+  skills: string[];
+  token: string;
+}
+
+export interface CurrentUserResponse {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  skills: string[];
 }
