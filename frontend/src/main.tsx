@@ -8,6 +8,7 @@ import "./index.css";
 import { ProfilePage } from "./pages/profile/Page";
 import { AuthCallbackPage } from "./pages/auth/callback/Page";
 import { GraphPage } from "./pages/graph-view";
+import { ReportPage } from "./pages/report";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -19,6 +20,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/graph" element={<GraphPage />} />
+        <Route path="/report" element={<ReportPage />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
