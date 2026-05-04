@@ -7,6 +7,7 @@ import { healthRouter } from "./routers/health";
 import { habrRouter } from "./routers/habr";
 import { wikipediaRouter } from "./routers/wikipedia";
 import { authRouter } from "./routers/auth";
+import { graphsRouter } from "./routers/graphs";
 import { setupContainer } from "./container";
 import { createSchema } from "./graphql/schema";
 import { createGraphQLContext } from "./graphql/context";
@@ -35,6 +36,7 @@ export async function createApp(): Promise<express.Express> {
   app.use("/habr", habrRouter);
   app.use("/wikipedia", wikipediaRouter);
   app.use("/auth", authRouter);
+  app.use("/graphs", graphsRouter);
 
   return app;
 }

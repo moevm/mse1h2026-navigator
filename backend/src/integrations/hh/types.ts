@@ -13,6 +13,7 @@ export interface DictionaryItem {
   export interface DictionaryItemWithUrl extends DictionaryItem {
 	url: string;
   }
+  
   export interface VacancySearchParams {
 	/** Номер страницы (default: 0) */
 	page?: number;
@@ -104,6 +105,18 @@ export interface DictionaryItem {
 	locale?: string;
   }
 
+  export interface EmployerSearchParams {
+	page?: number;
+	per_page?: number;
+	text?: string;
+	area?: string;
+	type?: string;
+	only_with_vacancies?: boolean;
+	sort_by?: string;
+	host?: string;	
+	locale?: string;
+  }
+
   export interface MetroStation {
 	station_name: string;
 	line_name: string;
@@ -142,7 +155,7 @@ export interface DictionaryItem {
 	[key: string]: any;
   }
   
-  export interface Employer {
+  export interface EmployerFromVacancy {
 	id: string | null;
 	name: string;
 	url: string | null;
@@ -370,7 +383,7 @@ export interface DictionaryItem {
 	url: string;
 	alternate_url: string;
 	relations: VacancyRelation[];
-	employer: Employer;
+	employer: EmployerFromVacancy;
 	snippet: Snippet;
 	contacts: Contact | null;
 	/** @deprecated Используйте work_schedule_by_days */
@@ -476,3 +489,28 @@ export interface DictionaryItem {
 	arguments?: any;
 	alternate_url?: string;
   }
+
+  export interface Employer {
+	id: string;
+	name: string;
+	alternate_url: string;
+	is_identified_by_esia: boolean;
+	logo_urls: LogoUrls;
+	open_vacancies: number;
+	url: string;
+	vacancies_url: string;
+  }	
+  export interface EmployerSearchResponse {
+	items: Employer[];
+	found: number;
+	pages: number;
+	page: number;
+	per_page: number;
+  }
+
+
+  export type GetVacanciesForProfessionParams = {
+	profession: string;
+	employerName?: string;
+  }
+

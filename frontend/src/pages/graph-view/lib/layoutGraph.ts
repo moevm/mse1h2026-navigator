@@ -5,6 +5,7 @@ const ROW_GAP = 190;
 const COLUMN_GAP = 280;
 const LAYER_ROW_GAP = 150;
 const MAX_NODES_PER_LAYER_ROW = 5;
+
 const collator = new Intl.Collator("en", {
   numeric: true,
   sensitivity: "base",
@@ -49,9 +50,11 @@ const hasPath = (
 
   while (stack.length > 0) {
     const currentId = stack.pop()!;
+
     if (currentId === targetId) {
       return true;
     }
+
     if (visited.has(currentId)) {
       continue;
     }
@@ -74,6 +77,7 @@ export async function layoutGraph(
 
   const rankedById = new Map(rankedNodes.map((node) => [node.id, node]));
   const nodeIds = rankedNodes.map((node) => node.id);
+
   const outgoing = new Map<string, string[]>();
   const incoming = new Map<string, string[]>();
   const indegree = new Map<string, number>();
@@ -96,6 +100,7 @@ export async function layoutGraph(
         rankedById.get(left.source)!,
         rankedById.get(right.source)!,
       );
+
       if (sourceCompare !== 0) {
         return sourceCompare;
       }
@@ -121,6 +126,7 @@ export async function layoutGraph(
     .sort((leftId, rightId) =>
       compareByWeight(rankedById.get(leftId)!, rankedById.get(rightId)!),
     );
+
   const topologicalOrder: string[] = [];
 
   while (queue.length > 0) {
@@ -163,6 +169,15 @@ export async function layoutGraph(
     }
   }
 
+  if (unresolved.length > 0) {
+    let fallbackDepth = Math.max(...depth.values()) + 1;
+
+    for (const id of unresolved) {
+      depth.set(id, fallbackDepth);
+      fallbackDepth += 1;
+    }
+  }
+
   const layers = new Map<number, string[]>();
 
   for (const id of topologicalOrder) {
@@ -175,6 +190,7 @@ export async function layoutGraph(
   const orderedLayers = Array.from(layers.entries()).sort(
     ([leftDepth], [rightDepth]) => leftDepth - rightDepth,
   );
+
   const orderInLayer = new Map<string, number>();
 
   for (const [layerIndex, layerNodeIds] of orderedLayers) {
@@ -182,11 +198,16 @@ export async function layoutGraph(
       const leftParents = (incoming.get(leftId) ?? [])
         .map((parentId) => orderInLayer.get(parentId))
         .filter((value): value is number => value !== undefined);
+
       const rightParents = (incoming.get(rightId) ?? [])
         .map((parentId) => orderInLayer.get(parentId))
         .filter((value): value is number => value !== undefined);
+
       const leftPrimary =
-        leftParents.length > 0 ? Math.min(...leftParents) : Number.MAX_SAFE_INTEGER;
+        leftParents.length > 0
+          ? Math.min(...leftParents)
+          : Number.MAX_SAFE_INTEGER;
+
       const rightPrimary =
         rightParents.length > 0
           ? Math.min(...rightParents)
@@ -198,11 +219,14 @@ export async function layoutGraph(
 
       const leftBarycenter =
         leftParents.length > 0
-          ? leftParents.reduce((sum, value) => sum + value, 0) / leftParents.length
+          ? leftParents.reduce((sum, value) => sum + value, 0) /
+            leftParents.length
           : Number.MAX_SAFE_INTEGER;
+
       const rightBarycenter =
         rightParents.length > 0
-          ? rightParents.reduce((sum, value) => sum + value, 0) / rightParents.length
+          ? rightParents.reduce((sum, value) => sum + value, 0) /
+            rightParents.length
           : Number.MAX_SAFE_INTEGER;
 
       if (leftBarycenter !== rightBarycenter) {
@@ -222,8 +246,8 @@ export async function layoutGraph(
   const positionById = new Map<string, { x: number; y: number }>();
   let yOffset = 0;
 
-  for (const [, sortedLayerIds] of orderedLayers) {
-    const sortedLayer = sortedLayerIds;
+  for (const [layerIndex] of orderedLayers) {
+    const sortedLayer = layers.get(layerIndex) ?? [];
     const rowCount = Math.max(
       1,
       Math.ceil(sortedLayer.length / MAX_NODES_PER_LAYER_ROW),
