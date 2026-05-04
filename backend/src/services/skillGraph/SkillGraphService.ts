@@ -30,18 +30,25 @@ export class SkillGraphService {
     professionName: string,
     isMock: boolean,
     initialTechnologies: string[] = [],
+    vacancyTitle?: string,
   ): Promise<SkillGraphGql> {
+    const technologies = await this.resolveInitialTechnologies(
+      initialTechnologies,
+      vacancyTitle,
+    );
+
     console.log(`\n[SkillGraph] ── START ──────────────────────────────────`);
     console.log(`[SkillGraph] profession="${professionName}"  isMock=${isMock}`);
+    console.log(`[SkillGraph] vacancy="${vacancyTitle?.trim() ?? ""}"`);
     console.log(
-      `[SkillGraph] initialTechnologies=[${normalizeTechnologyList(initialTechnologies).join(", ")}]`,
+      `[SkillGraph] initialTechnologies=[${technologies.join(", ")}]`,
     );
 
     console.log(`[SkillGraph] [1/3] Fetching raw graph from graph-data-service...`);
     const rawGraph = await this.loadRawGraph(
       professionName,
       isMock,
-      initialTechnologies,
+      technologies,
     );
     console.log(`[SkillGraph] [1/3] Done. nodes=${rawGraph.nodes.length}, edges=${rawGraph.edges.length}`);
     console.log(`[SkillGraph]       nodes: [${rawGraph.nodes.join(", ")}]`);
@@ -104,6 +111,22 @@ export class SkillGraphService {
       );
       return this.buildFallbackRawGraph(professionName, initialTechnologies);
     }
+  }
+
+  private async resolveInitialTechnologies(
+    initialTechnologies: string[],
+    vacancyTitle?: string,
+  ): Promise<string[]> {
+    const normalizedVacancyTitle = vacancyTitle?.trim();
+    if (!normalizedVacancyTitle) {
+      return normalizeTechnologyList(initialTechnologies);
+    }
+
+    const vacancySkills = await this.hhClient.findVacancySkillsForProfession(
+      normalizedVacancyTitle,
+    );
+
+    return mergeTechnologyLists(initialTechnologies, vacancySkills).slice(0, 20);
   }
 
   private async buildFallbackRawGraph(

@@ -6,6 +6,7 @@ import { createApp } from "../../app";
 import { prisma } from "../../lib/prisma";
 import { createAppToken } from "../../lib/token";
 import { GraphDataServiceClient } from "../../routers/graphDataService/GraphDataServiceClient";
+import { HHClient } from "../../integrations/hh";
 
 const testUserIds: string[] = [];
 let app: Express;
@@ -123,6 +124,9 @@ describe("skill graph GraphQL integration", () => {
       nodes: ["HTTP", "Node.js"],
       edges: [{ from_skill: "HTTP", to_skill: "Node.js" }],
     });
+    vi.spyOn(HHClient.prototype, "findVacancySkillsForProfession").mockResolvedValue(
+      []
+    );
     app = await createApp();
   });
 
@@ -193,6 +197,94 @@ describe("skill graph GraphQL integration", () => {
     );
   });
 
+  it("uses HeadHunter vacancy skills as initial technologies when creating a graph", async () => {
+    const user = await createTestUser("create-hh");
+    const getProfessionGraphMock = vi.mocked(
+      GraphDataServiceClient.prototype.getProfessionGraph
+    );
+    const findVacancySkillsMock = vi.mocked(
+      HHClient.prototype.findVacancySkillsForProfession
+    );
+    getProfessionGraphMock.mockClear();
+    findVacancySkillsMock.mockResolvedValueOnce(["React", "TypeScript", "React"]);
+
+    const response = await gql({
+      userId: user.id,
+      query: `
+        mutation CreateOrLoadGraph($input: CreateOrLoadGraphInput!) {
+          createOrLoadGraph(input: $input) {
+            id
+            professionTitle
+            nodes { id title }
+          }
+        }
+      `,
+      variables: {
+        input: {
+          professionTitle: "Frontend Developer",
+          vacancyTitle: "React Frontend разработчик",
+          initialTechnologies: ["HTML", "React"],
+          isMock: true,
+          forceRegenerate: true,
+        },
+      },
+    });
+
+    expect(response.body.errors).toBeUndefined();
+    expect(findVacancySkillsMock).toHaveBeenCalledWith(
+      "React Frontend разработчик"
+    );
+    expect(getProfessionGraphMock).toHaveBeenCalledWith(
+      "Frontend Developer",
+      true,
+      true,
+      ["HTML", "React", "TypeScript"]
+    );
+  });
+
+  it("normalizes generated graph edges into a tree without feedback edges", async () => {
+    const user = await createTestUser("create-tree");
+    const getProfessionGraphMock = vi.mocked(
+      GraphDataServiceClient.prototype.getProfessionGraph
+    );
+    getProfessionGraphMock.mockResolvedValueOnce({
+      nodes: ["React", "TypeScript", "CSS"],
+      edges: [
+        { from_skill: "React", to_skill: "TypeScript" },
+        { from_skill: "TypeScript", to_skill: "React" },
+        { from_skill: "CSS", to_skill: "TypeScript" },
+        { from_skill: "TypeScript", to_skill: "CSS" },
+      ],
+    });
+
+    const response = await gql({
+      userId: user.id,
+      query: `
+        mutation CreateOrLoadGraph($input: CreateOrLoadGraphInput!) {
+          createOrLoadGraph(input: $input) {
+            mainSkill { id }
+            nodes { id title }
+            edges { fromId toId }
+          }
+        }
+      `,
+      variables: {
+        input: {
+          professionTitle: "Frontend Developer",
+          isMock: true,
+          forceRegenerate: true,
+        },
+      },
+    });
+
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.createOrLoadGraph.edges).toEqual([
+      { fromId: "react", toId: "typescript" },
+      { fromId: "typescript", toId: "css" },
+      { fromId: "frontend-developer", toId: "react" },
+    ]);
+  });
+
   it("loads only graphs owned by authenticated user", async () => {
     const user = await createTestUser("owner");
     const otherUser = await createTestUser("other");
@@ -223,6 +315,35 @@ describe("skill graph GraphQL integration", () => {
     });
 
     expect(forbiddenResponse.body.errors?.[0]?.message).toBe("Graph not found");
+  });
+
+  it("deletes a saved graph owned by the authenticated user", async () => {
+    const user = await createTestUser("delete-graph");
+    const graph = await createTestGraph(user.id, "delete-graph");
+
+    const deleteResponse = await gql({
+      userId: user.id,
+      query: `
+        mutation DeleteGraph($graphId: String!) {
+          deleteGraph(graphId: $graphId)
+        }
+      `,
+      variables: { graphId: graph.id },
+    });
+
+    expect(deleteResponse.body.errors).toBeUndefined();
+    expect(deleteResponse.body.data.deleteGraph).toBe(true);
+
+    const listResponse = await gql({
+      userId: user.id,
+      query: `
+        query SavedGraphs {
+          savedGraphs { id }
+        }
+      `,
+    });
+
+    expect(listResponse.body.data.savedGraphs).toEqual([]);
   });
 
   it("updates node fields and syncs completed user skills", async () => {

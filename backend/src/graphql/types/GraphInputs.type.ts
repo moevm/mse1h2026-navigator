@@ -83,6 +83,9 @@ export class CreateOrLoadGraphInput {
   @Field()
   professionTitle: string = "";
 
+  @Field(() => String, { nullable: true })
+  vacancyTitle?: string;
+
   @Field(() => [String], { nullable: true })
   initialTechnologies?: string[];
 
