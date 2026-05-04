@@ -124,7 +124,8 @@ export class SkillGraphResolver {
         normalizeBuiltGraphData(
           await this.skillGraphService.getSkillGraph(
             input.professionTitle,
-            input.isMock
+            input.isMock,
+            input.initialTechnologies ?? []
           )
         ),
     });

@@ -147,6 +147,10 @@ describe("skill graph GraphQL integration", () => {
 
   it("creates and loads a graph through GraphQL", async () => {
     const user = await createTestUser("create");
+    const getProfessionGraphMock = vi.mocked(
+      GraphDataServiceClient.prototype.getProfessionGraph
+    );
+    getProfessionGraphMock.mockClear();
 
     const response = await gql({
       userId: user.id,
@@ -165,6 +169,7 @@ describe("skill graph GraphQL integration", () => {
       variables: {
         input: {
           professionTitle: "Backend Developer",
+          initialTechnologies: ["Node.js", "PostgreSQL"],
           isMock: true,
           forceRegenerate: true,
         },
@@ -179,6 +184,12 @@ describe("skill graph GraphQL integration", () => {
     expect(response.body.data.createOrLoadGraph.initialNodes).toHaveLength(2);
     expect(response.body.data.createOrLoadGraph.initialEdges).toEqual(
       response.body.data.createOrLoadGraph.edges
+    );
+    expect(getProfessionGraphMock).toHaveBeenCalledWith(
+      "Backend Developer",
+      true,
+      true,
+      ["Node.js", "PostgreSQL"]
     );
   });
 

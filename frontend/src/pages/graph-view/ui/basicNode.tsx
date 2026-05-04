@@ -6,7 +6,15 @@ import { SourceHandleTypes, TargetHandleTypes } from "../config/handleTypes";
 
 export const BasicNode: FC<NodeProps<BasicFlowNode>> = memo(({ data }) => {
   return (
-    <div className="bg-white rounded-full p-2 aspect-square flex items-center justify-center">
+    <div
+      className={`flex aspect-square min-h-28 w-32 items-center justify-center rounded-md border p-3 text-center text-sm shadow-sm transition ${
+        data.isCompleted
+          ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+          : data.isRequired
+            ? "border-slate-300 bg-white text-slate-900"
+            : "border-slate-200 bg-slate-50 text-slate-700"
+      }`}
+    >
       <Handle
         id={SourceHandleTypes.TOP_SOURCE}
         type="source"
@@ -49,7 +57,10 @@ export const BasicNode: FC<NodeProps<BasicFlowNode>> = memo(({ data }) => {
         position={Position.Right}
       />
 
-      <div className="text-center break-words px-2 max-w-30">{data.title}</div>
+      <div className="max-w-full break-words px-1 leading-tight">
+        <p>{data.title}</p>
+        <p className="mt-1 text-[10px] text-slate-500">{data.learnHours} ч</p>
+      </div>
     </div>
   );
 });

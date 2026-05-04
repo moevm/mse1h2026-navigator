@@ -9,11 +9,16 @@ import { CourseGql } from "../../graphql/types/Course.type";
 import { BookGql } from "../../graphql/types/Book.type";
 import { ArticleGql } from "../../graphql/types/Article.type";
 import { LearningTimeInfoGql } from "../../graphql/types/LearningTimeInfo.type";
+import { HHClient } from "../../integrations/hh";
+import { HHApiWrapper } from "../../integrations/hh/api/wrapper";
+import type { RawSkillGraph } from "../../routers/graphDataService/types";
 
 const SKILL_GRAPH_REPOSITORY_TOKEN = "ISkillGraphRepository";
 
 @injectable()
 export class SkillGraphService {
+  private readonly hhClient = new HHClient(new HHApiWrapper());
+
   constructor(
     @inject(SKILL_GRAPH_REPOSITORY_TOKEN)
     private readonly graphRepo: ISkillGraphRepository,
@@ -24,12 +29,20 @@ export class SkillGraphService {
   public async getSkillGraph(
     professionName: string,
     isMock: boolean,
+    initialTechnologies: string[] = [],
   ): Promise<SkillGraphGql> {
     console.log(`\n[SkillGraph] ── START ──────────────────────────────────`);
     console.log(`[SkillGraph] profession="${professionName}"  isMock=${isMock}`);
+    console.log(
+      `[SkillGraph] initialTechnologies=[${normalizeTechnologyList(initialTechnologies).join(", ")}]`,
+    );
 
     console.log(`[SkillGraph] [1/3] Fetching raw graph from graph-data-service...`);
-    const rawGraph = await this.graphRepo.getGraph(professionName, isMock);
+    const rawGraph = await this.loadRawGraph(
+      professionName,
+      isMock,
+      initialTechnologies,
+    );
     console.log(`[SkillGraph] [1/3] Done. nodes=${rawGraph.nodes.length}, edges=${rawGraph.edges.length}`);
     console.log(`[SkillGraph]       nodes: [${rawGraph.nodes.join(", ")}]`);
 
@@ -70,6 +83,91 @@ export class SkillGraphService {
 
     console.log(`[SkillGraph] ── DONE ───────────────────────────────────\n`);
     return result;
+  }
+
+  private async loadRawGraph(
+    professionName: string,
+    isMock: boolean,
+    initialTechnologies: string[],
+  ): Promise<RawSkillGraph> {
+    try {
+      return await this.graphRepo.getGraph(
+        professionName,
+        isMock,
+        initialTechnologies,
+      );
+    } catch (error) {
+      console.warn(
+        `[SkillGraph] graph-data-service failed, falling back to HH vacancy skills: ${String(
+          error,
+        )}`,
+      );
+      return this.buildFallbackRawGraph(professionName, initialTechnologies);
+    }
+  }
+
+  private async buildFallbackRawGraph(
+    professionName: string,
+    initialTechnologies: string[] = [],
+  ): Promise<RawSkillGraph> {
+    const skills = await this.hhClient.findVacancySkillsForProfession(professionName);
+    const discoveredSkills = normalizeTechnologyList(skills);
+
+    if (discoveredSkills.length === 0) {
+      const genericSkills = this.buildGenericFallbackSkills(professionName);
+      const nodes = mergeTechnologyLists(initialTechnologies, genericSkills);
+      return {
+        nodes,
+        edges: this.buildChainEdges(nodes),
+      };
+    }
+
+    const nodes = mergeTechnologyLists(initialTechnologies, discoveredSkills).slice(0, 20);
+    return {
+      nodes,
+      edges: this.buildChainEdges(nodes),
+    };
+  }
+
+  private buildGenericFallbackSkills(professionName: string): string[] {
+    const normalized = professionName.toLowerCase();
+
+    if (normalized.includes("frontend")) {
+      return ["JavaScript", "TypeScript", "HTML", "CSS", "React", "Testing"];
+    }
+
+    if (normalized.includes("backend")) {
+      return ["HTTP", "REST", "Databases", "SQL", "Node.js", "Testing"];
+    }
+
+    if (normalized.includes("data")) {
+      return ["SQL", "Python", "Statistics", "Pandas", "Machine Learning"];
+    }
+
+    return [
+      "Git",
+      "HTTP",
+      "Databases",
+      "Testing",
+      "Debugging",
+      "Documentation",
+    ];
+  }
+
+  private buildChainEdges(skills: string[]): RawSkillGraph["edges"] {
+    return skills
+      .map((skill, index) => {
+        const target = skills[index + 1];
+        if (!target) {
+          return null;
+        }
+
+        return {
+          from_skill: skill,
+          to_skill: target,
+        };
+      })
+      .filter((edge): edge is { from_skill: string; to_skill: string } => edge !== null);
   }
 
   private async buildSkill(title: string, id: string): Promise<SkillGql> {
@@ -147,4 +245,32 @@ export class SkillGraphService {
       .replace(/\s+/g, "-")
       .replace(/[^a-z0-9-]/g, "");
   }
+}
+
+function normalizeTechnologyList(technologies: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const technology of technologies) {
+    const normalized = technology.trim();
+    const key = normalized.toLowerCase();
+    if (!normalized || seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    result.push(normalized);
+  }
+
+  return result;
+}
+
+function mergeTechnologyLists(
+  preferredTechnologies: string[],
+  discoveredTechnologies: string[],
+): string[] {
+  return normalizeTechnologyList([
+    ...preferredTechnologies,
+    ...discoveredTechnologies,
+  ]);
 }

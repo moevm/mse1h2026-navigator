@@ -10,10 +10,15 @@ interface TokenPayload {
 
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error("JWT_SECRET is required");
+  if (secret) {
+    return secret;
   }
-  return secret;
+
+  if (process.env.NODE_ENV !== "production") {
+    return "navigator-local-dev-secret";
+  }
+
+  throw new Error("JWT_SECRET is required");
 }
 
 function base64UrlEncode(value: string): string {

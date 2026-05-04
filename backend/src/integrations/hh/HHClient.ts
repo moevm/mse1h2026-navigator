@@ -4,8 +4,6 @@ import type { VacancySearchParams, Vacancy, VacancyDetail, Employer, KeySkill } 
 
 
 export class HHClient {
-
-
 	constructor(private readonly api: HHApiWrapper) { }
 
 	/**
@@ -15,11 +13,16 @@ export class HHClient {
 	 */
 	public async findVacancySkillsForProfession(profession: string): Promise<string[]> {
 		try {
-			const vacancies = await this.api.searchVacancies({ text: profession, page: 1, per_page: 10 });
+			const vacancies = await this.api.searchVacancies({ text: profession, page: 1, per_page: 6 });
 			const skills = new Set<string>();
-			for (const vacancy of vacancies.items) {
-				const detail = await this.api.getVacancyDetail(vacancy.id);
-				detail.key_skills.forEach((skill: KeySkill) => skills.add(skill.name));
+			const details = await Promise.allSettled(
+				vacancies.items.map((vacancy: Vacancy) => this.api.getVacancyDetail(vacancy.id)),
+			);
+			for (const result of details) {
+				if (result.status !== "fulfilled") {
+					continue;
+				}
+				result.value.key_skills.forEach((skill: KeySkill) => skills.add(skill.name));
 			}
 			return Array.from(skills);
 		} catch (error) {

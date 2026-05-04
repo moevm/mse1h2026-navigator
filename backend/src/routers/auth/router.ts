@@ -17,8 +17,8 @@ function hashId(id: string): string {
   return createHash("sha256").update(id).digest("hex");
 }
 
-function buildAvatarUrl(avatarId: string, isAvatarEmpty: boolean): string {
-  if (isAvatarEmpty) {
+function buildAvatarUrl(avatarId?: string, isAvatarEmpty?: boolean): string {
+  if (isAvatarEmpty || !avatarId) {
     return "";
   }
   return `https://avatars.yandex.net/get-yapic/${avatarId}/islands-200`;
@@ -84,26 +84,30 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
     }
 
     const yandexUser = response.data;
-    const yandexIdHash = hashId(yandexUser.id);
+    const yandexId = String(yandexUser.id);
+    const yandexIdHash = hashId(yandexId);
     const avatarUrl = buildAvatarUrl(
       yandexUser.default_avatar_id,
       yandexUser.is_avatar_empty
     );
+    const username = yandexUser.login || yandexId;
+    const firstName = yandexUser.first_name ?? "";
+    const lastName = yandexUser.last_name ?? "";
 
     const user = await prisma.user.upsert({
       where: { yandexIdHash },
       create: {
         yandexIdHash,
-        username: yandexUser.login,
-        firstName: yandexUser.first_name,
-        lastName: yandexUser.last_name,
+        username,
+        firstName,
+        lastName,
         avatarUrl,
         skills: [],
       },
       update: {
-        username: yandexUser.login,
-        firstName: yandexUser.first_name,
-        lastName: yandexUser.last_name,
+        username,
+        firstName,
+        lastName,
         avatarUrl,
       },
     });

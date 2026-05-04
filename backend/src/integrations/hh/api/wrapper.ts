@@ -15,9 +15,12 @@ export class HHApiWrapper {
     });
 
     this.client.interceptors.request.use(async (config) => {
+    const userAgent =
+      process.env.HH_USER_AGENT || 'mse-navigator/1.0 (local development)';
 		config.headers = new AxiosHeaders({
 			...config.headers,
-			'HH-User-Agent': process.env.HH_USER_AGENT || '',
+			'User-Agent': userAgent,
+			'HH-User-Agent': userAgent,
 		});
 		return config;
 	}, (error) => {
