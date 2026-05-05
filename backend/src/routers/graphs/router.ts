@@ -75,6 +75,9 @@ function convertGraphData(
   mainSkill: GraphResponse["mainSkill"];
   nodes: GraphSkill[];
   edges: GraphSkillsRelation[];
+  initialMainSkill: GraphResponse["mainSkill"];
+  initialNodes: GraphSkill[];
+  initialEdges: GraphSkillsRelation[];
 } {
   const skillTitleById = new Map<string, string>();
   const skillIdByTitle = new Map<string, string>();
@@ -137,7 +140,14 @@ function convertGraphData(
     }
   });
 
-  return { mainSkill, nodes, edges };
+  return {
+    mainSkill,
+    nodes,
+    edges,
+    initialMainSkill: mainSkill,
+    initialNodes: nodes,
+    initialEdges: edges,
+  };
 }
 
 async function fetchGraphData(
