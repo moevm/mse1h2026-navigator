@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, User } from "lucide-react";
+import { ArrowLeft, Home, Plus, User } from "lucide-react";
 import { getCurrentUser } from "@/api/auth";
 import type { CurrentUserResponse } from "@/api/types";
 
@@ -58,6 +58,19 @@ export const ProfilePage = () => {
     <div className="min-h-screen bg-neutral-900 p-6">
       <Card className="mx-auto max-w-4xl min-h-[600px] flex flex-col">
         <CardContent className="flex flex-col flex-1 p-8">
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+              <ArrowLeft />
+              Назад
+            </Button>
+            <Button asChild type="button" variant="secondary">
+              <Link to="/">
+                <Home />
+                Главная
+              </Link>
+            </Button>
+          </div>
+
           <Avatar className="size-14 mb-4">
             <AvatarImage src={user.avatarUrl} alt={user.username} />
             <AvatarFallback className="text-lg">

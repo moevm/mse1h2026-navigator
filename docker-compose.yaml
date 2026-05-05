@@ -42,8 +42,10 @@ services:
       - path: ./backend/.env
         required: false
     environment:
+      - PORT=3000
       - DATABASE_URL=mongodb://mongo:27017/navigator?replicaSet=rs0&directConnection=true
       - GRAPH_DATA_SERVICE_URL=http://graph-data-service:8000
+      - GRAPH_DATA_SERVICE_TIMEOUT_MS=180000
       - JWT_SECRET=${JWT_SECRET:-navigator-dev-secret}
     depends_on:
       mongo-init:
@@ -64,6 +66,12 @@ services:
       - APP_PORT=8000
       - REDIS_URL=redis://redis:6379/0
       - GRAPH_CACHE_TTL_SECONDS=604800
+      - GRAPH_DATA_SERVICE_MAX_SKILLS=45
+      - GRAPH_DATA_SERVICE_USE_SKILLS_LLM=true
+      - GRAPH_DATA_SERVICE_USE_RELATION_LLM=true
+      - HF_REQUEST_TIMEOUT_SECONDS=35
+      - DBPEDIA_WORKERS=12
+      - DBPEDIA_TIMEOUT_SECONDS=6
     depends_on:
       redis:
         condition: service_healthy

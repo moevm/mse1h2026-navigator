@@ -1,12 +1,21 @@
 import { memo } from "react";
 import type { FC } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { ChevronRight } from "lucide-react";
 import type { BasicFlowNode } from "../types/nodes";
 import { SourceHandleTypes, TargetHandleTypes } from "../config/handleTypes";
 
 export const BasicNode: FC<NodeProps<BasicFlowNode>> = memo(({ data }) => {
   return (
-    <div className="bg-white rounded-full p-2 aspect-square flex items-center justify-center">
+    <div
+      className={`relative flex aspect-square min-h-28 w-32 cursor-pointer items-center justify-center rounded-md border p-3 text-center text-sm shadow-sm transition ${
+        data.isCompleted
+          ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+          : data.isRequired
+            ? "border-slate-300 bg-white text-slate-900"
+            : "border-slate-200 bg-slate-50 text-slate-700"
+      }`}
+    >
       <Handle
         id={SourceHandleTypes.TOP_SOURCE}
         type="source"
@@ -49,7 +58,17 @@ export const BasicNode: FC<NodeProps<BasicFlowNode>> = memo(({ data }) => {
         position={Position.Right}
       />
 
-      <div className="text-center break-words px-2 max-w-30">{data.title}</div>
+      <div className="max-w-full break-words px-1 leading-tight">
+        <p>{data.title}</p>
+        <p className="mt-1 text-[10px] text-slate-500">{data.learnHours} ч</p>
+      </div>
+
+      {data.isCollapsed && data.hiddenDescendantsCount ? (
+        <span className="absolute bottom-2 right-2 inline-flex h-6 min-w-6 items-center justify-center gap-0.5 rounded-md bg-slate-900 px-1.5 text-[11px] font-semibold text-white shadow-sm">
+          <ChevronRight className="size-3" />
+          {data.hiddenDescendantsCount}
+        </span>
+      ) : null}
     </div>
   );
 });

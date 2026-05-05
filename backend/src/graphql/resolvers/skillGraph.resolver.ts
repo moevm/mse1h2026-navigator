@@ -16,6 +16,7 @@ import {
   createGraphEdge as createGraphEdgeService,
   createGraphNode as createGraphNodeService,
   createOrLoadUserGraph,
+  deleteUserGraph,
   deleteGraphEdge as deleteGraphEdgeService,
   deleteGraphNode as deleteGraphNodeService,
   getGraphSubgraph,
@@ -124,7 +125,9 @@ export class SkillGraphResolver {
         normalizeBuiltGraphData(
           await this.skillGraphService.getSkillGraph(
             input.professionTitle,
-            input.isMock
+            input.isMock,
+            input.initialTechnologies ?? [],
+            input.vacancyTitle
           )
         ),
     });
@@ -182,6 +185,18 @@ export class SkillGraphResolver {
     return this.toSavedSkillGraphGql(
       await deleteGraphNodeService(user.id, graphId, nodeId)
     );
+  }
+
+  @Mutation(() => Boolean, {
+    description: "Полностью удалить сохраненный граф текущего пользователя",
+  })
+  async deleteGraph(
+    @Arg("graphId") graphId: string,
+    @Ctx() context: GraphQLContext
+  ): Promise<boolean> {
+    const user = requireGraphQLUser(context);
+    await deleteUserGraph(user.id, graphId);
+    return true;
   }
 
   @Mutation(() => SavedSkillGraphGql, {

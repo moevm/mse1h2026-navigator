@@ -10,6 +10,7 @@ export interface RawSkillGraph {
 
 export interface GetProfessionGraphRequest {
   profession_title: string;
+  initial_technologies?: string[];
   is_mock?: boolean;
   use_cache?: boolean;
 }

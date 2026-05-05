@@ -181,53 +181,103 @@ export function normalizeBuiltGraphData(graph: {
   }>;
   edges: SkillsRelation[];
 }): BuiltGraphData {
-  return {
-    mainSkill: {
-      id: graph.mainSkill.id,
-      title: graph.mainSkill.title,
-      description: graph.mainSkill.description,
-    },
-    nodes: graph.nodes.map((node, nodeIndex) => ({
-      id: node.id,
-      title: node.title,
-      description: node.description,
-      isCompleted: node.isCompleted,
-      isRequired: node.isRequired,
-      isArchieved: node.isArchieved,
-      priority: node.priority,
-      learnHours: Math.max(0, Math.round(node.learnHours)),
-      courses: (node.courses ?? []).map((course) => ({
-        id: course.id,
-        title: course.title,
-        description: course.description,
-        learningTimeInfo: course.learningTimeInfo ?? null,
-        link: course.link,
-        image: course.image ?? null,
-      })),
-      books: (node.books ?? []).map((book) => ({
-        id: book.id,
-        title: book.title,
-        author: book.author,
-        description: book.description,
-        link: book.link,
-        image: book.image ?? null,
-      })),
-      articles: (node.articles ?? []).map((article, articleIndex) => ({
-        id:
-          article.id ??
-          buildResourceId(
-            article.link || article.title || "",
-            `article-${nodeIndex + 1}-${articleIndex + 1}`
-          ),
-        title: article.title,
-        description: article.description,
-        link: article.link,
-        rating: article.rating,
-        tags: article.tags,
-      })),
-    })),
-    edges: graph.edges,
+  const mainSkill = {
+    id: graph.mainSkill.id,
+    title: graph.mainSkill.title,
+    description: graph.mainSkill.description,
   };
+  const nodes = graph.nodes.map((node, nodeIndex) => ({
+    id: node.id,
+    title: node.title,
+    description: node.description,
+    isCompleted: node.isCompleted,
+    isRequired: node.isRequired,
+    isArchieved: node.isArchieved,
+    priority: node.priority,
+    learnHours: Math.max(0, Math.round(node.learnHours)),
+    courses: (node.courses ?? []).map((course) => ({
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      learningTimeInfo: course.learningTimeInfo ?? null,
+      link: course.link,
+      image: course.image ?? null,
+    })),
+    books: (node.books ?? []).map((book) => ({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      description: book.description,
+      link: book.link,
+      image: book.image ?? null,
+    })),
+    articles: (node.articles ?? []).map((article, articleIndex) => ({
+      id:
+        article.id ??
+        buildResourceId(
+          article.link || article.title || "",
+          `article-${nodeIndex + 1}-${articleIndex + 1}`
+        ),
+      title: article.title,
+      description: article.description,
+      link: article.link,
+      rating: article.rating,
+      tags: article.tags,
+    })),
+  }));
+
+  return {
+    mainSkill,
+    nodes,
+    edges: normalizeTreeEdges(mainSkill, nodes, graph.edges),
+  };
+}
+
+function normalizeTreeEdges(
+  mainSkill: MainSkill,
+  nodes: Pick<Skill, "id">[],
+  edges: SkillsRelation[]
+): SkillsRelation[] {
+  const nodeIds = new Set(nodes.map((node) => node.id));
+  const allIds = new Set([mainSkill.id, ...nodeIds]);
+  const normalizedEdges: SkillsRelation[] = [];
+  const targetsWithParent = new Set<string>();
+  const edgeKeys = new Set<string>();
+
+  for (const edge of edges) {
+    if (
+      !allIds.has(edge.fromId) ||
+      !nodeIds.has(edge.toId) ||
+      edge.fromId === edge.toId ||
+      targetsWithParent.has(edge.toId)
+    ) {
+      continue;
+    }
+
+    const edgeKey = `${edge.fromId}->${edge.toId}`;
+    if (edgeKeys.has(edgeKey)) {
+      continue;
+    }
+
+    if (wouldCreateCycle(normalizedEdges, edge.fromId, edge.toId)) {
+      continue;
+    }
+
+    normalizedEdges.push({ fromId: edge.fromId, toId: edge.toId });
+    edgeKeys.add(edgeKey);
+    targetsWithParent.add(edge.toId);
+  }
+
+  for (const node of nodes) {
+    if (targetsWithParent.has(node.id)) {
+      continue;
+    }
+
+    normalizedEdges.push({ fromId: mainSkill.id, toId: node.id });
+    targetsWithParent.add(node.id);
+  }
+
+  return normalizedEdges;
 }
 
 function cloneMainSkill(mainSkill: MainSkill): MainSkill {
@@ -334,21 +384,7 @@ export function convertGraphData(
     })
     .filter((edge): edge is SkillsRelation => edge !== null);
 
-  const targetNodeIds = new Set<string>();
-  const connectedNodeIds = new Set<string>();
-  edges.forEach((edge) => {
-    connectedNodeIds.add(edge.fromId);
-    connectedNodeIds.add(edge.toId);
-    targetNodeIds.add(edge.toId);
-  });
-
-  nodes.forEach((node) => {
-    if (!connectedNodeIds.has(node.id) || !targetNodeIds.has(node.id)) {
-      edges.push({ fromId: mainSkill.id, toId: node.id });
-    }
-  });
-
-  return { mainSkill, nodes, edges };
+  return { mainSkill, nodes, edges: normalizeTreeEdges(mainSkill, nodes, edges) };
 }
 
 export async function findUserGraph(
@@ -397,6 +433,14 @@ export async function getInitialUserGraph(
   graphId: string
 ): Promise<GraphResponse> {
   return mapInitialGraphResponse(await findUserGraph(userId, graphId));
+}
+
+export async function deleteUserGraph(
+  userId: string,
+  graphId: string
+): Promise<void> {
+  await findUserGraph(userId, graphId);
+  await prisma.graph.delete({ where: { id: graphId } });
 }
 
 export async function createOrLoadUserGraph(params: {
