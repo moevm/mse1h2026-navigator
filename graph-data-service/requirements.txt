@@ -1,6 +1,15 @@
 fastapi==0.115.8
 uvicorn==0.34.0
 python-dotenv==1.0.1
+python-json-logger==3.2.1
+python-telegram==0.15.0
+pytz==2025.2
+PyYAML==6.0.2
+pyzmq==26.2.0
+RapidFuzz==3.14.3
+rdflib==7.6.0
+redis==5.2.1
+referencing==0.30.2
 pydantic==2.10.6
 requests==2.32.3
 thefuzz==0.22.1

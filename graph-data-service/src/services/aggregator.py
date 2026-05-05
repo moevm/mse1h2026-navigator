@@ -2,6 +2,7 @@ import json
 import os
 import re
 
+from ..services.graph_cache import get_cached_graph, set_cached_graph
 from ..services.skills_finder import SkillsFinder
 from ..services.skills_normalizer import SkillsNormalizer
 from ..services.skills_relation_finder import SkillsRelationFinder
@@ -204,14 +205,24 @@ def get_skill_graph_data(
     initial_technologies = normalize_initial_technologies(initial_technologies)
     print(f"Initial technologies: {initial_technologies}")
 
+    if use_cache:
+        cached_graph = get_cached_graph(job_title, is_mock)
+        if cached_graph is not None:
+            return cached_graph
+
     if is_mock:
         mock_file_path = "cache/mock_answer.json"
         if os.path.exists(mock_file_path):
             print(f"Using mock data from {mock_file_path}")
             with open(mock_file_path, "r", encoding="utf-8") as f:
-                return merge_mock_graph_with_initial_technologies(
+                graph_data = merge_mock_graph_with_initial_technologies(
                     json.load(f), initial_technologies
                 )
+
+            if use_cache:
+                set_cached_graph(job_title, is_mock, graph_data)
+
+            return graph_data
         else:
             print(
                 f"Mock file {mock_file_path} not found, falling back to normal processing"
@@ -304,7 +315,12 @@ def get_skill_graph_data(
         node_names,
         initial_technologies,
     )
-    return {
+    graph_data = {
         "nodes": node_names,
         "edges": normalized_relations,
     }
+
+    if use_cache:
+        set_cached_graph(job_title, is_mock, graph_data)
+
+    return graph_data

@@ -5,10 +5,16 @@ Install dependencies
 pip install -r requirements.txt
 ```
 
+Docker uses `requirements.runtime.txt`, which contains only the runtime packages
+needed by graph-data-service.
+
 Add env-s 
 ```.env.example
 APP_PORT=
 HF_TOKEN=
+HF_MODEL_NAME=
+REDIS_URL=redis://localhost:6379/0
+GRAPH_CACHE_TTL_SECONDS=604800
 ```
 
 Start app
@@ -28,7 +34,7 @@ POST "/get_profession_graph" - main route.
 Params for "/get_profession_graph":
 - profession_title: STR - the profession title in Russian or English.
 - is_mock: BOOLEAN - if true, returns mock data with the same structure as real data (no tokens spent).
-- use_cache: BOOLEAN - if true, reads from (or creates, if not yet created) cached .json files with data. Works for everything except final LLM edge normalizing.
+- use_cache: BOOLEAN - if true, reads the final `{ nodes, edges }` graph from Redis or stores it there after generation. If Redis is unavailable, graph generation continues without cache.
 
 
 # Examples
