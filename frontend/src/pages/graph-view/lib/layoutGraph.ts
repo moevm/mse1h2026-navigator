@@ -1,8 +1,15 @@
-import type { GraphNode } from "../types/nodes";
 import type { Edge } from "@xyflow/react";
+import type { GraphNode } from "../types/nodes";
+
 const ROW_GAP = 190;
 const COLUMN_GAP = 280;
-const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+const LAYER_ROW_GAP = 150;
+const MAX_NODES_PER_LAYER_ROW = 5;
+
+const collator = new Intl.Collator("en", {
+  numeric: true,
+  sensitivity: "base",
+});
 
 type RankedNode = {
   id: string;
@@ -33,7 +40,36 @@ const compareByWeight = (a: RankedNode, b: RankedNode): number => {
   return collator.compare(a.id, b.id);
 };
 
-export async function layoutGraph(nodes: GraphNode[], edges: Edge[]) {
+const hasPath = (
+  outgoing: Map<string, string[]>,
+  sourceId: string,
+  targetId: string,
+): boolean => {
+  const visited = new Set<string>();
+  const stack = [sourceId];
+
+  while (stack.length > 0) {
+    const currentId = stack.pop()!;
+
+    if (currentId === targetId) {
+      return true;
+    }
+
+    if (visited.has(currentId)) {
+      continue;
+    }
+
+    visited.add(currentId);
+    stack.push(...(outgoing.get(currentId) ?? []));
+  }
+
+  return false;
+};
+
+export async function layoutGraph(
+  nodes: GraphNode[],
+  edges: Edge[],
+): Promise<{ nodes: GraphNode[]; edges: Edge[] }> {
   const rankedNodes: RankedNode[] = nodes.map((node) => ({
     id: node.id,
     rawWeight: getNodeWeight(node),
@@ -52,8 +88,31 @@ export async function layoutGraph(nodes: GraphNode[], edges: Edge[]) {
     indegree.set(id, 0);
   }
 
-  for (const edge of edges) {
-    if (!rankedById.has(edge.source) || !rankedById.has(edge.target)) {
+  const validEdges = edges
+    .filter(
+      (edge) =>
+        rankedById.has(edge.source) &&
+        rankedById.has(edge.target) &&
+        edge.source !== edge.target,
+    )
+    .sort((left, right) => {
+      const sourceCompare = compareByWeight(
+        rankedById.get(left.source)!,
+        rankedById.get(right.source)!,
+      );
+
+      if (sourceCompare !== 0) {
+        return sourceCompare;
+      }
+
+      return compareByWeight(
+        rankedById.get(left.target)!,
+        rankedById.get(right.target)!,
+      );
+    });
+
+  for (const edge of validEdges) {
+    if (hasPath(outgoing, edge.target, edge.source)) {
       continue;
     }
 
@@ -139,12 +198,20 @@ export async function layoutGraph(nodes: GraphNode[], edges: Edge[]) {
       const leftParents = (incoming.get(leftId) ?? [])
         .map((parentId) => orderInLayer.get(parentId))
         .filter((value): value is number => value !== undefined);
+
       const rightParents = (incoming.get(rightId) ?? [])
         .map((parentId) => orderInLayer.get(parentId))
         .filter((value): value is number => value !== undefined);
 
-      const leftPrimary = leftParents.length > 0 ? Math.min(...leftParents) : Number.MAX_SAFE_INTEGER;
-      const rightPrimary = rightParents.length > 0 ? Math.min(...rightParents) : Number.MAX_SAFE_INTEGER;
+      const leftPrimary =
+        leftParents.length > 0
+          ? Math.min(...leftParents)
+          : Number.MAX_SAFE_INTEGER;
+
+      const rightPrimary =
+        rightParents.length > 0
+          ? Math.min(...rightParents)
+          : Number.MAX_SAFE_INTEGER;
 
       if (leftPrimary !== rightPrimary) {
         return leftPrimary - rightPrimary;
@@ -152,11 +219,14 @@ export async function layoutGraph(nodes: GraphNode[], edges: Edge[]) {
 
       const leftBarycenter =
         leftParents.length > 0
-          ? leftParents.reduce((sum, value) => sum + value, 0) / leftParents.length
+          ? leftParents.reduce((sum, value) => sum + value, 0) /
+            leftParents.length
           : Number.MAX_SAFE_INTEGER;
+
       const rightBarycenter =
         rightParents.length > 0
-          ? rightParents.reduce((sum, value) => sum + value, 0) / rightParents.length
+          ? rightParents.reduce((sum, value) => sum + value, 0) /
+            rightParents.length
           : Number.MAX_SAFE_INTEGER;
 
       if (leftBarycenter !== rightBarycenter) {
@@ -174,17 +244,32 @@ export async function layoutGraph(nodes: GraphNode[], edges: Edge[]) {
   }
 
   const positionById = new Map<string, { x: number; y: number }>();
+  let yOffset = 0;
 
   for (const [layerIndex] of orderedLayers) {
     const sortedLayer = layers.get(layerIndex) ?? [];
-    const totalWidth = (sortedLayer.length - 1) * COLUMN_GAP;
+    const rowCount = Math.max(
+      1,
+      Math.ceil(sortedLayer.length / MAX_NODES_PER_LAYER_ROW),
+    );
 
     sortedLayer.forEach((id, index) => {
+      const rowIndex = Math.floor(index / MAX_NODES_PER_LAYER_ROW);
+      const rowStart = rowIndex * MAX_NODES_PER_LAYER_ROW;
+      const rowLength = Math.min(
+        MAX_NODES_PER_LAYER_ROW,
+        sortedLayer.length - rowStart,
+      );
+      const indexInRow = index - rowStart;
+      const totalWidth = (rowLength - 1) * COLUMN_GAP;
+
       positionById.set(id, {
-        x: index * COLUMN_GAP - totalWidth / 2,
-        y: layerIndex * ROW_GAP,
+        x: indexInRow * COLUMN_GAP - totalWidth / 2,
+        y: yOffset + rowIndex * LAYER_ROW_GAP,
       });
     });
+
+    yOffset += ROW_GAP + (rowCount - 1) * LAYER_ROW_GAP;
   }
 
   return {

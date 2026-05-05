@@ -19,6 +19,7 @@ class SkillsNormalizer:
         self._profession_name = profession_name
         self._hf_model_name = hf_model_name or os.environ.get("HF_MODEL_NAME")
         self._hf_token = os.environ["HF_TOKEN"]
+        self._timeout = int(os.getenv("HF_REQUEST_TIMEOUT_SECONDS", "35"))
 
         if "" in [self._hf_model_name, self._hf_token]:
             raise ValueError("HF_MODEL_NAME and HF_TOKEN must be set")
@@ -27,6 +28,7 @@ class SkillsNormalizer:
             OpenAI(
                 base_url=self._hf_url,
                 api_key=os.environ["HF_TOKEN"],
+                timeout=self._timeout,
             ),
             mode=instructor.Mode.JSON,
         )

@@ -10,7 +10,16 @@ export class GraphDataServiceRepository implements ISkillGraphRepository {
     private readonly client: GraphDataServiceClient,
   ) {}
 
-  public async getGraph(professionName: string, isMock: boolean): Promise<RawSkillGraph> {
-    return this.client.getProfessionGraph(professionName, isMock, true);
+  public async getGraph(
+    professionName: string,
+    isMock: boolean,
+    initialTechnologies: string[] = [],
+  ): Promise<RawSkillGraph> {
+    return this.client.getProfessionGraph(
+      professionName,
+      isMock,
+      true,
+      initialTechnologies,
+    );
   }
 }

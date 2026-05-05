@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { MainPage } from "./pages/main/Page";
 import { SecondaryPage } from "./pages/secondary/Page";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import "./index.css";
 // import { RFExamplePage } from "./pages/rfExample/page";
 import { ProfilePage } from "./pages/profile/Page";
@@ -19,7 +19,8 @@ createRoot(document.getElementById("root")!).render(
         {/* <Route path="/rf_example" element={<RFExamplePage />} /> */}
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        <Route path="/graph" element={<GraphPage />} />
+        <Route path="/graph" element={<Navigate to="/" replace />} />
+        <Route path="/graph/:graphId" element={<GraphPage />} />
         <Route path="/report" element={<ReportPage />} />
       </Routes>
     </BrowserRouter>

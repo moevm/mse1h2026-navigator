@@ -1,12 +1,13 @@
 import { memo } from "react";
 import type { FC } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { ChevronRight } from "lucide-react";
 import type { MainFlowNode } from "../types/nodes";
 import { SourceHandleTypes, TargetHandleTypes } from "../config/handleTypes";
 
 export const MainNode: FC<NodeProps<MainFlowNode>> = memo(({ data }) => {
   return (
-    <div className="bg-white rounded-full p-2 aspect-square flex items-center justify-center">
+    <div className="relative flex aspect-square min-h-32 w-36 cursor-pointer items-center justify-center rounded-md border border-slate-900 bg-slate-900 p-3 text-center text-sm text-white shadow-md">
       <Handle
         id={SourceHandleTypes.TOP_SOURCE}
         type="source"
@@ -49,7 +50,16 @@ export const MainNode: FC<NodeProps<MainFlowNode>> = memo(({ data }) => {
         position={Position.Right}
       />
 
-      <div className="text-center break-words px-2 max-w-30">{data.title}</div>
+      <div className="max-w-full break-words px-1 font-semibold leading-tight">
+        {data.title}
+      </div>
+
+      {data.isCollapsed && data.hiddenDescendantsCount ? (
+        <span className="absolute bottom-2 right-2 inline-flex h-6 min-w-6 items-center justify-center gap-0.5 rounded-md bg-white px-1.5 text-[11px] font-semibold text-slate-900 shadow-sm">
+          <ChevronRight className="size-3" />
+          {data.hiddenDescendantsCount}
+        </span>
+      ) : null}
     </div>
   );
 });
