@@ -21,6 +21,17 @@ services:
       "try { rs.status().ok } catch (error) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }) }"
     restart: "no"
 
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
   backend:
     build:
       context: ./backend
@@ -51,7 +62,13 @@ services:
         required: false
     environment:
       - APP_PORT=8000
+      - REDIS_URL=redis://redis:6379/0
+      - GRAPH_CACHE_TTL_SECONDS=604800
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
   mongo-data:
+  redis-data:
