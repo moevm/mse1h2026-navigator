@@ -2,6 +2,7 @@ import { apiClient } from "./client";
 import type {
   CreateGraphNodeInput,
   GraphEdgeInput,
+  GraphFileFormat,
   GraphListItem,
   GraphResponse,
   GraphSearchParams,
@@ -161,6 +162,35 @@ export async function deleteGraph(graphId: string): Promise<boolean> {
   return data.deleteGraph;
 }
 
+export async function exportGraphFile(
+  graphId: string,
+  format: GraphFileFormat,
+): Promise<Blob> {
+  const { data } = await apiClient.get<Blob>(
+    `/api/graphs/${graphId}/export?format=${format}`,
+    { responseType: "blob" },
+  );
+
+  return data;
+}
+
+export async function importGraphFile(
+  file: File,
+  format: GraphFileFormat,
+): Promise<GraphResponse> {
+  const { data } = await apiClient.post<GraphResponse>(
+    `/api/graphs/import?format=${format}`,
+    file,
+    {
+      headers: {
+        "Content-Type": file.type || contentTypeByFormat[format],
+      },
+    },
+  );
+
+  return data;
+}
+
 export async function updateGraphNode(
   graphId: string,
   nodeId: string,
@@ -308,3 +338,8 @@ export async function getGraphSubgraph(params: {
   );
   return data.graphSubgraph;
 }
+
+const contentTypeByFormat: Record<GraphFileFormat, string> = {
+  rdfxml: "application/rdf+xml",
+  turtle: "text/turtle",
+};

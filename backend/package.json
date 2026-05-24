@@ -21,7 +21,9 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "fast-xml-parser": "^5.8.0",
     "graphql": "^16.13.1",
+    "n3": "^2.0.3",
     "reflect-metadata": "^0.2.2",
     "tsyringe": "^4.10.0",
     "type-graphql": "^2.0.0-rc.3"
@@ -30,6 +32,7 @@
     "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
+    "@types/n3": "^1.26.1",
     "@types/node": "^25.3.0",
     "@types/supertest": "^7.2.0",
     "prisma": "6",

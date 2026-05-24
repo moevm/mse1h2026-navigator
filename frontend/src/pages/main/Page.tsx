@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  Download,
   GitBranch,
   Loader2,
   LogIn,
@@ -10,13 +11,21 @@ import {
   RefreshCw,
   Search,
   Trash2,
+  Upload,
   User,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { createOrLoadGraph, deleteGraph, listSavedGraphs } from "@/api/graphs";
+import {
+  createOrLoadGraph,
+  deleteGraph,
+  importGraphFile,
+  listSavedGraphs,
+} from "@/api/graphs";
 import type { AuthResponse, GraphListItem } from "@/api/types";
+import { GraphExportDialog } from "@/components/graph/GraphExportDialog";
+import { getGraphFileFormat, graphFileInputAccept } from "@/lib/graphFiles";
 
 const YANDEX_CLIENT_ID = import.meta.env.VITE_YANDEX_CLIENT_ID;
 const YANDEX_REDIRECT_URI = import.meta.env.VITE_YANDEX_REDIRECT_URI;
@@ -54,6 +63,7 @@ function formatDate(value: string): string {
 
 export const MainPage = () => {
   const navigate = useNavigate();
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const [user, setUser] = useState<Partial<AuthResponse> | null>(() =>
     getStoredUser(),
   );
@@ -65,7 +75,9 @@ export const MainPage = () => {
   const [graphs, setGraphs] = useState<GraphListItem[]>([]);
   const [isLoadingGraphs, setIsLoadingGraphs] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isImportingGraph, setIsImportingGraph] = useState(false);
   const [deletingGraphId, setDeletingGraphId] = useState<string | null>(null);
+  const [exportingGraph, setExportingGraph] = useState<GraphListItem | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const sortedGraphs = useMemo(
@@ -180,6 +192,34 @@ export const MainPage = () => {
       setError(error instanceof Error ? error.message : "Не удалось удалить граф");
     } finally {
       setDeletingGraphId(null);
+    }
+  };
+
+  const handleImportGraph = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    const format = getGraphFileFormat(file);
+    if (!format) {
+      setError("Выберите файл графа в формате .owl, .rdf, .xml или .ttl");
+      return;
+    }
+
+    setIsImportingGraph(true);
+    setError(null);
+
+    try {
+      const graph = await importGraphFile(file, format);
+      await loadGraphs();
+      navigate(`/graph/${graph.id}`);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Не удалось импортировать граф");
+    } finally {
+      setIsImportingGraph(false);
     }
   };
 
@@ -338,22 +378,44 @@ export const MainPage = () => {
                 Открываются по адресу `/graph/:graphId`.
               </p>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isLoadingGraphs}
-              onClick={() => void loadGraphs()}
-            >
-              <RefreshCw className={isLoadingGraphs ? "animate-spin" : undefined} />
-              Обновить
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <input
+                ref={importInputRef}
+                type="file"
+                accept={graphFileInputAccept}
+                className="hidden"
+                onChange={(event) => void handleImportGraph(event)}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isImportingGraph}
+                onClick={() => importInputRef.current?.click()}
+              >
+                {isImportingGraph ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <Upload />
+                )}
+                Импортировать граф
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isLoadingGraphs}
+                onClick={() => void loadGraphs()}
+              >
+                <RefreshCw className={isLoadingGraphs ? "animate-spin" : undefined} />
+                Обновить
+              </Button>
+            </div>
           </div>
 
           <div className="mt-4 space-y-2">
             {sortedGraphs.map((graph) => (
               <div
                 key={graph.id}
-                className="grid gap-2 rounded-md border border-slate-200 px-3 py-3 transition hover:border-slate-400 hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_auto_auto]"
+                className="grid gap-2 rounded-md border border-slate-200 px-3 py-3 transition hover:border-slate-400 hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto]"
               >
                 <Link to={`/graph/${graph.id}`} className="min-w-0">
                   <span className="block truncate text-sm font-medium text-slate-900">
@@ -367,6 +429,15 @@ export const MainPage = () => {
                   {formatDate(graph.updatedAt)}
                   <ArrowRight className="size-4" />
                 </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setExportingGraph(graph)}
+                  aria-label={`Экспортировать граф ${graph.professionTitle}`}
+                >
+                  <Download />
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
@@ -399,6 +470,16 @@ export const MainPage = () => {
           </div>
         </section>
       </div>
+      <GraphExportDialog
+        graphId={exportingGraph?.id ?? null}
+        graphTitle={exportingGraph?.professionTitle}
+        open={Boolean(exportingGraph)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setExportingGraph(null);
+          }
+        }}
+      />
     </main>
   );
 };

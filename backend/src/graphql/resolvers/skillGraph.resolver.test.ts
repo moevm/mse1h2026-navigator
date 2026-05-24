@@ -317,6 +317,173 @@ describe("skill graph GraphQL integration", () => {
     expect(forbiddenResponse.body.errors?.[0]?.message).toBe("Graph not found");
   });
 
+  it("exports an owned graph as RDF/XML and Turtle through REST", async () => {
+    const user = await createTestUser("export");
+    const graph = await createTestGraph(user.id, "export");
+
+    const rdfResponse = await request(app)
+      .get(`/graphs/${graph.id}/export?format=rdfxml`)
+      .set("Authorization", authHeader(user.id));
+
+    expect(rdfResponse.status).toBe(200);
+    expect(rdfResponse.headers["content-type"]).toContain("application/rdf+xml");
+    expect(rdfResponse.headers["content-disposition"]).toContain(
+      `graph-${graph.id}.owl`
+    );
+    expect(rdfResponse.text).toContain("<rdf:RDF");
+    expect(rdfResponse.text).toContain("<nav:SkillGraph");
+    expect(rdfResponse.text).toContain("<rdfs:label>HTTP</rdfs:label>");
+
+    const turtleResponse = await request(app)
+      .get(`/graphs/${graph.id}/export?format=turtle`)
+      .set("Authorization", authHeader(user.id));
+
+    expect(turtleResponse.status).toBe(200);
+    expect(turtleResponse.headers["content-type"]).toContain("text/turtle");
+    expect(turtleResponse.headers["content-disposition"]).toContain(
+      `graph-${graph.id}.ttl`
+    );
+    expect(turtleResponse.text).toContain("@prefix nav:");
+    expect(turtleResponse.text).toContain("a owl:Ontology, nav:SkillGraph");
+    expect(turtleResponse.text).toContain('rdfs:label "HTTP"');
+  });
+
+  it("imports exported RDF/XML and Turtle graphs as new saved graphs", async () => {
+    const user = await createTestUser("import");
+    const graph = await createTestGraph(user.id, "import");
+
+    const rdfResponse = await request(app)
+      .get(`/graphs/${graph.id}/export?format=rdfxml`)
+      .set("Authorization", authHeader(user.id));
+    const rdfImportResponse = await request(app)
+      .post("/graphs/import?format=rdfxml")
+      .set("Authorization", authHeader(user.id))
+      .set("Content-Type", "application/rdf+xml")
+      .send(rdfResponse.text);
+
+    expect(rdfImportResponse.status).toBe(201);
+    expect(rdfImportResponse.body.id).not.toBe(graph.id);
+    expect(rdfImportResponse.body.nodes.map((node: { title: string }) => node.title)).toEqual([
+      "HTTP",
+      "Node.js",
+      "Databases",
+    ]);
+    expect(rdfImportResponse.body.initialNodes).toEqual(rdfImportResponse.body.nodes);
+    expect(rdfImportResponse.body.initialEdges).toEqual(rdfImportResponse.body.edges);
+
+    const turtleResponse = await request(app)
+      .get(`/graphs/${graph.id}/export?format=turtle`)
+      .set("Authorization", authHeader(user.id));
+    const turtleImportResponse = await request(app)
+      .post("/graphs/import?format=turtle")
+      .set("Authorization", authHeader(user.id))
+      .set("Content-Type", "text/turtle")
+      .send(turtleResponse.text);
+
+    expect(turtleImportResponse.status).toBe(201);
+    expect(turtleImportResponse.body.id).not.toBe(graph.id);
+    expect(turtleImportResponse.body.nodes).toHaveLength(3);
+    expect(turtleImportResponse.body.edges).toEqual(
+      expect.arrayContaining([
+        { fromId: "main", toId: "skill-a" },
+        { fromId: "skill-a", toId: "skill-b" },
+        { fromId: "skill-b", toId: "skill-c" },
+      ])
+    );
+  });
+
+  it("rejects invalid graph import payloads", async () => {
+    const user = await createTestUser("import-invalid");
+    const unsupportedFormatResponse = await request(app)
+      .post("/graphs/import?format=jsonld")
+      .set("Authorization", authHeader(user.id))
+      .set("Content-Type", "text/plain")
+      .send("graph");
+
+    expect(unsupportedFormatResponse.status).toBe(400);
+    expect(unsupportedFormatResponse.body.error).toBe("Unsupported import format");
+
+    const malformedResponse = await request(app)
+      .post("/graphs/import?format=turtle")
+      .set("Authorization", authHeader(user.id))
+      .set("Content-Type", "text/turtle")
+      .send("not valid turtle");
+
+    expect(malformedResponse.status).toBe(400);
+    expect(malformedResponse.body.error).toBe("Invalid graph import content");
+
+    const unknownEdgeResponse = await request(app)
+      .post("/graphs/import?format=turtle")
+      .set("Authorization", authHeader(user.id))
+      .set("Content-Type", "text/turtle")
+      .send(`
+@prefix nav: <https://mse1h2026-navigator.local/ontology#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://mse1h2026-navigator.local/graphs/import-invalid> a owl:Ontology, nav:SkillGraph ;
+  rdfs:label "Imported Graph" ;
+  nav:hasMainSkill <https://mse1h2026-navigator.local/graphs/import-invalid/skills/main> ;
+  nav:hasSkill <https://mse1h2026-navigator.local/graphs/import-invalid/skills/skill-a> .
+
+<https://mse1h2026-navigator.local/graphs/import-invalid/skills/main> a nav:MainSkill ;
+  rdfs:label "Imported Graph" ;
+  dcterms:description "Imported roadmap" .
+
+<https://mse1h2026-navigator.local/graphs/import-invalid/skills/skill-a> a nav:Skill ;
+  rdfs:label "HTTP" ;
+  dcterms:description "" ;
+  nav:isCompleted "false"^^xsd:boolean ;
+  nav:isRequired "true"^^xsd:boolean ;
+  nav:isArchieved "false"^^xsd:boolean ;
+  nav:priority "1"^^xsd:integer ;
+  nav:learnHours "4"^^xsd:integer .
+
+<https://mse1h2026-navigator.local/graphs/import-invalid/skills/skill-a>
+  nav:dependsOn <https://mse1h2026-navigator.local/graphs/import-invalid/skills/missing> .
+      `);
+
+    expect(unknownEdgeResponse.status).toBe(400);
+    expect(unknownEdgeResponse.body.error).toBe(
+      "Edge references unknown target node: missing"
+    );
+  });
+
+  it("protects graph export through REST authorization and ownership", async () => {
+    const user = await createTestUser("export-owner");
+    const otherUser = await createTestUser("export-other");
+    const graph = await createTestGraph(user.id, "export-owner");
+
+    const unauthorizedResponse = await request(app).get(
+      `/graphs/${graph.id}/export?format=rdfxml`
+    );
+
+    expect(unauthorizedResponse.status).toBe(401);
+    expect(unauthorizedResponse.body.error).toBe("Authorization token is required");
+
+    const forbiddenResponse = await request(app)
+      .get(`/graphs/${graph.id}/export?format=rdfxml`)
+      .set("Authorization", authHeader(otherUser.id));
+
+    expect(forbiddenResponse.status).toBe(404);
+    expect(forbiddenResponse.body.error).toBe("Graph not found");
+  });
+
+  it("rejects unsupported graph export formats", async () => {
+    const user = await createTestUser("export-format");
+    const graph = await createTestGraph(user.id, "export-format");
+
+    const response = await request(app)
+      .get(`/graphs/${graph.id}/export?format=jsonld`)
+      .set("Authorization", authHeader(user.id));
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe("Unsupported export format");
+  });
+
   it("deletes a saved graph owned by the authenticated user", async () => {
     const user = await createTestUser("delete-graph");
     const graph = await createTestGraph(user.id, "delete-graph");

@@ -1,7 +1,19 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, text } from "express";
 import axios from "axios";
 import { prisma } from "../../lib/prisma";
 import { requireAuth, AuthenticatedRequest } from "../../middleware/auth";
+import {
+  GraphServiceError,
+  getUserGraph,
+  importUserGraph,
+} from "../../services/graphEditing/service";
+import {
+  exportGraph,
+  GraphImportError,
+  importGraph,
+  parseGraphExportFormat,
+  parseGraphImportFormat,
+} from "../../services/graphExport/service";
 import {
   CreateGraphRequest,
   GraphDataServiceResponse,
@@ -251,6 +263,85 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
     throw error;
   }
 });
+
+router.get("/:graphId/export", async (req: Request, res: Response): Promise<void> => {
+  const user = (req as AuthenticatedRequest).user;
+  const graphId = req.params.graphId;
+  const format = parseGraphExportFormat(req.query.format);
+
+  if (typeof graphId !== "string") {
+    res.status(400).json({ error: "graphId is required" });
+    return;
+  }
+
+  if (!format) {
+    res.status(400).json({ error: "Unsupported export format" });
+    return;
+  }
+
+  try {
+    const graph = await getUserGraph(user.id, graphId);
+    const exportedGraph = exportGraph(graph, format);
+
+    res.setHeader("Content-Type", exportedGraph.contentType);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="graph-${graphId}.${exportedGraph.fileExtension}"`
+    );
+    res.send(exportedGraph.content);
+  } catch (error) {
+    if (error instanceof GraphServiceError) {
+      res.status(error.statusCode).json({ error: error.message });
+      return;
+    }
+
+    throw error;
+  }
+});
+
+router.post(
+  "/import",
+  text({
+    type: ["application/rdf+xml", "application/xml", "text/turtle", "text/plain"],
+    limit: "5mb",
+  }),
+  async (req: Request, res: Response): Promise<void> => {
+    const user = (req as AuthenticatedRequest).user;
+    const format = parseGraphImportFormat(req.query.format);
+
+    if (!format) {
+      res.status(400).json({ error: "Unsupported import format" });
+      return;
+    }
+
+    if (typeof req.body !== "string" || req.body.trim().length === 0) {
+      res.status(400).json({ error: "Import file content is required" });
+      return;
+    }
+
+    try {
+      const importedGraph = importGraph(req.body, format);
+      const graph = await importUserGraph({
+        userId: user.id,
+        graphData: importedGraph.graphData,
+      });
+
+      res.status(201).json(graph);
+    } catch (error) {
+      if (error instanceof GraphImportError) {
+        res.status(400).json({ error: error.message });
+        return;
+      }
+
+      if (error instanceof GraphServiceError) {
+        res.status(error.statusCode).json({ error: error.message });
+        return;
+      }
+
+      throw error;
+    }
+  }
+);
 
 router.get("/:graphId", async (req: Request, res: Response): Promise<void> => {
   const user = (req as AuthenticatedRequest).user;

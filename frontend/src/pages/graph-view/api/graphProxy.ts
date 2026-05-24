@@ -4,8 +4,10 @@ import {
   createOrLoadGraph,
   deleteGraphEdge,
   deleteGraphNode,
+  exportGraphFile,
   getGraphSubgraph,
   getSavedGraph,
+  importGraphFile,
   listSavedGraphs,
   resetGraphToInitial,
   updateGraphNode,
@@ -13,6 +15,7 @@ import {
 import type {
   CreateGraphNodeInput,
   GraphEdgeInput,
+  GraphFileFormat,
   GraphListItem,
   GraphResponse,
   GraphSearchParams,
@@ -31,8 +34,32 @@ export class GraphProxy {
     return await listSavedGraphs();
   };
 
+  public static getGraphInfo = async (): Promise<GraphResponse> => {
+    const graphs = await listSavedGraphs();
+    const graph = graphs[0];
+    if (!graph) {
+      throw new Error("Нет сохранённых графов для отчёта");
+    }
+
+    return await getSavedGraph(graph.id);
+  };
+
   public static getSavedGraph = async (graphId: string): Promise<GraphResponse> => {
     return await getSavedGraph(graphId);
+  };
+
+  public static exportGraphFile = async (
+    graphId: string,
+    format: GraphFileFormat,
+  ): Promise<Blob> => {
+    return await exportGraphFile(graphId, format);
+  };
+
+  public static importGraphFile = async (
+    file: File,
+    format: GraphFileFormat,
+  ): Promise<GraphResponse> => {
+    return await importGraphFile(file, format);
   };
 
   public static updateGraphNode = async (
