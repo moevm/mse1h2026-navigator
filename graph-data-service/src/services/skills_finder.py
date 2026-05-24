@@ -19,7 +19,8 @@ class SkillsFinder:
         gh_profession_url = f"{self.roadmap_github_base_url}{profession_name}/content"
         print(f"Profession URL: {gh_profession_url}")
 
-        response = requests.get(gh_profession_url)
+        response = requests.get(gh_profession_url, timeout=10)
+        response.raise_for_status()
         data = response.json()
 
         skill_names = []
@@ -81,7 +82,8 @@ class SkillsFinder:
         return None
 
     def __get_all_profession_names(self):
-        response = requests.get(self.roadmap_github_base_url)
+        response = requests.get(self.roadmap_github_base_url, timeout=10)
+        response.raise_for_status()
         data = response.json()
 
         names = []

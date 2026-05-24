@@ -1,10 +1,10 @@
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-COPY requirements.txt .
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
+COPY requirements.runtime.txt .
+RUN pip wheel --no-cache-dir --wheel-dir /app/wheels -r requirements.runtime.txt
 
 FROM python:3.11-slim
 WORKDIR /app
@@ -20,4 +20,4 @@ USER app
 
 ENV APP_PORT=8000
 
-CMD uvicorn main:app --host 0.0.0.0 --port ${APP_PORT} --proxy-headers
+CMD uvicorn src.main:app --host 0.0.0.0 --port ${APP_PORT} --proxy-headers

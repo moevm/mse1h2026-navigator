@@ -1,7 +1,15 @@
 import { Router, Request, Response } from "express";
 import axios, { AxiosError } from "axios";
 import { createHash } from "crypto";
-import { YandexUserInfo, YandexApiError, AuthResponse } from "./types";
+import { prisma } from "../../lib/prisma";
+import { createAppToken } from "../../lib/token";
+import { requireAuth, AuthenticatedRequest } from "../../middleware/auth";
+import {
+  YandexUserInfo,
+  YandexApiError,
+  AuthResponse,
+  CurrentUserResponse,
+} from "./types";
 
 export const router = Router();
 
@@ -9,12 +17,35 @@ function hashId(id: string): string {
   return createHash("sha256").update(id).digest("hex");
 }
 
-function buildAvatarUrl(avatarId: string, isAvatarEmpty: boolean): string {
-  if (isAvatarEmpty) {
+function buildAvatarUrl(avatarId?: string, isAvatarEmpty?: boolean): string {
+  if (isAvatarEmpty || !avatarId) {
     return "";
   }
   return `https://avatars.yandex.net/get-yapic/${avatarId}/islands-200`;
 }
+
+function mapCurrentUserResponse(user: {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  skills: string[];
+}): CurrentUserResponse {
+  return {
+    id: user.id,
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    avatarUrl: user.avatarUrl,
+    skills: user.skills,
+  };
+}
+
+router.get("/me", requireAuth, (req: Request, res: Response): void => {
+  const user = (req as AuthenticatedRequest).user;
+  res.json(mapCurrentUserResponse(user));
+});
 
 router.post("/", async (req: Request, res: Response): Promise<void> => {
   const { oauthToken } = req.body as { oauthToken?: string };
@@ -53,15 +84,37 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
     }
 
     const yandexUser = response.data;
+    const yandexId = String(yandexUser.id);
+    const yandexIdHash = hashId(yandexId);
+    const avatarUrl = buildAvatarUrl(
+      yandexUser.default_avatar_id,
+      yandexUser.is_avatar_empty
+    );
+    const username = yandexUser.login || yandexId;
+    const firstName = yandexUser.first_name ?? "";
+    const lastName = yandexUser.last_name ?? "";
 
-    // TODO: save user to the database
+    const user = await prisma.user.upsert({
+      where: { yandexIdHash },
+      create: {
+        yandexIdHash,
+        username,
+        firstName,
+        lastName,
+        avatarUrl,
+        skills: [],
+      },
+      update: {
+        username,
+        firstName,
+        lastName,
+        avatarUrl,
+      },
+    });
 
     const authResponse: AuthResponse = {
-      id: hashId(yandexUser.id),
-      username: yandexUser.login,
-      firstName: yandexUser.first_name,
-      lastName: yandexUser.last_name,
-      avatarUrl: buildAvatarUrl(yandexUser.default_avatar_id, yandexUser.is_avatar_empty),
+      ...mapCurrentUserResponse(user),
+      token: createAppToken(user.id),
     };
 
     res.json(authResponse);

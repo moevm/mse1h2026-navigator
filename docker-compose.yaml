@@ -7,7 +7,7 @@ services:
       - mongo-data:/data/db
     command: ["--replSet", "rs0", "--bind_ip_all"]
     healthcheck:
-      test: mongosh --eval "rs.status()" --quiet
+      test: mongosh --eval "db.adminCommand('ping')" --quiet
       interval: 5s
       retries: 10
 
@@ -16,8 +16,21 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
-    command: mongosh --host mongo --eval "rs.initiate()"
+    command: >
+      mongosh --host mongo --eval
+      "try { rs.status().ok } catch (error) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }) }"
     restart: "no"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
 
   backend:
     build:
@@ -26,12 +39,44 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment:
-      - DATABASE_URL=mongodb://mongo:27017/navigator?replicaSet=rs0
+      - PORT=3000
+      - DATABASE_URL=mongodb://mongo:27017/navigator?replicaSet=rs0&directConnection=true
+      - GRAPH_DATA_SERVICE_URL=http://graph-data-service:8000
+      - GRAPH_DATA_SERVICE_TIMEOUT_MS=180000
+      - JWT_SECRET=${JWT_SECRET:-navigator-dev-secret}
     depends_on:
       mongo-init:
         condition: service_completed_successfully
+      graph-data-service:
+        condition: service_started
+
+  graph-data-service:
+    build:
+      context: ./graph-data-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: ./graph-data-service/.env
+        required: false
+    environment:
+      - APP_PORT=8000
+      - REDIS_URL=redis://redis:6379/0
+      - GRAPH_CACHE_TTL_SECONDS=604800
+      - GRAPH_DATA_SERVICE_MAX_SKILLS=45
+      - GRAPH_DATA_SERVICE_USE_SKILLS_LLM=true
+      - GRAPH_DATA_SERVICE_USE_RELATION_LLM=true
+      - HF_REQUEST_TIMEOUT_SECONDS=35
+      - DBPEDIA_WORKERS=12
+      - DBPEDIA_TIMEOUT_SECONDS=6
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   mongo-data:
+  redis-data:

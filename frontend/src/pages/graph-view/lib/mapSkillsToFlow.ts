@@ -1,4 +1,4 @@
-import type { Edge } from "@xyflow/react";
+import { MarkerType, type Edge } from "@xyflow/react";
 import type { Skill, MainSkill, SkillsRelation } from "@/entities/skill/types";
 import type { GraphNode } from "../types/nodes";
 
@@ -30,6 +30,12 @@ export const mapSkillsToFlow = (
     id: `${rel.fromId}-${rel.toId}`,
     source: rel.fromId,
     target: rel.toId,
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      width: 18,
+      height: 18,
+      color: "#64748b",
+    },
   }));
 
   return { nodes, edges };

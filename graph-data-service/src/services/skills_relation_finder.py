@@ -1,3 +1,5 @@
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List
 
 import networkx as nx
@@ -11,8 +13,8 @@ class SkillsRelationFinder:
     def __init__(self, profession_name: str, skills_list: List[str]):
         self._profession_name = profession_name
         self._skills_list = skills_list
-        self._sparql = SPARQLWrapper(self._endpoint)
-        self._sparql.setReturnFormat(JSON)
+        self._workers = int(os.getenv("DBPEDIA_WORKERS", "12"))
+        self._timeout = int(os.getenv("DBPEDIA_TIMEOUT_SECONDS", "6"))
 
         self._graph = nx.DiGraph()
         self._graph.add_nodes_from(skills_list)
@@ -25,6 +27,7 @@ class SkillsRelationFinder:
     def find_skill_relations(self):
         relations_set = set()
         print("[FIND] Starting to find skill relations...")
+        skills_by_lower_name = {skill.lower(): skill for skill in self._skills_list}
 
         for skill, source_uri in tqdm(self._uris_map.items(), desc="Processing skills"):
             if not source_uri:
@@ -56,9 +59,10 @@ class SkillsRelationFinder:
         }}
         LIMIT 1
         """
-        self._sparql.setQuery(query)
+        sparql = self._create_sparql()
+        sparql.setQuery(query)
         try:
-            results = self._sparql.query().convert()
+            results = sparql.query().convert()
             if results["results"]["bindings"]:
                 return results["results"]["bindings"][0]["resource"]["value"]
             else:
@@ -76,9 +80,10 @@ class SkillsRelationFinder:
             <{source_uri}> dbo:wikiPageWikiLink ?target .
         }}
         """
-        self._sparql.setQuery(query)
+        sparql = self._create_sparql()
+        sparql.setQuery(query)
         try:
-            results: Dict[str, Any] = self._sparql.query().convert()
+            results: Dict[str, Any] = sparql.query().convert()
             return [
                 binding["target"]["value"] for binding in results["results"]["bindings"]
             ]

@@ -1,13 +1,33 @@
 services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
   fastapi_app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: my_api_container
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
-      - APP_PORT=${APP_PORT}
+      - APP_PORT=${APP_PORT:-8000}
+      - REDIS_URL=redis://redis:6379/0
+      - GRAPH_CACHE_TTL_SECONDS=${GRAPH_CACHE_TTL_SECONDS:-604800}
     ports:
-      - "${APP_PORT}:${APP_PORT}"
+      - "${APP_PORT:-8000}:${APP_PORT:-8000}"
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: unless-stopped
+
+volumes:
+  redis-data:
