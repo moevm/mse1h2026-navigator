@@ -15,6 +15,7 @@ def normalize_profession_cache_key(profession_title: str) -> str:
     normalized = profession_title.strip().lower()
     normalized = re.sub(r"\s+", "_", normalized)
     normalized = normalized.replace(":", "_")
+    normalized = re.sub(r"_+", "_", normalized).strip("_")
     return normalized
 
 

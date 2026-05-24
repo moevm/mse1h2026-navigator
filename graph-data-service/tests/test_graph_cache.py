@@ -6,35 +6,6 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-
-class PlaceholderService:
-    pass
-
-
-def stub_service_module(module_name, **attrs):
-    module = types.ModuleType(module_name)
-    for attr_name, attr_value in attrs.items():
-        setattr(module, attr_name, attr_value)
-    sys.modules[module_name] = module
-
-
-stub_service_module(
-    "src.services.skills_finder",
-    SkillsFinder=PlaceholderService,
-)
-stub_service_module(
-    "src.services.skills_normalizer",
-    SkillsNormalizer=PlaceholderService,
-)
-stub_service_module(
-    "src.services.skills_relation_finder",
-    SkillsRelationFinder=PlaceholderService,
-)
-stub_service_module(
-    "src.services.skills_relations_normalizer",
-    SkillRelationNormalizer=PlaceholderService,
-)
-
 from src.services import aggregator
 from src.services import graph_cache
 
@@ -73,6 +44,7 @@ class GraphCacheTests(unittest.TestCase):
         edge = SimpleNamespace(from_skill="HTTP", to_skill="Node.js")
 
         with (
+            patch.dict(os.environ, {"GRAPH_DATA_SERVICE_USE_DISK_CACHE": "false"}),
             patch.object(aggregator, "get_cached_graph", return_value=None),
             patch.object(aggregator, "set_cached_graph") as set_cached_graph,
             patch.object(aggregator, "SkillsFinder") as skills_finder,
@@ -137,6 +109,7 @@ class GraphCacheTests(unittest.TestCase):
         edge = SimpleNamespace(from_skill="HTTP", to_skill="Node.js")
 
         with (
+            patch.dict(os.environ, {"GRAPH_DATA_SERVICE_USE_DISK_CACHE": "false"}),
             patch.object(aggregator, "SkillsFinder") as skills_finder,
             patch.object(aggregator, "SkillsNormalizer") as skills_normalizer,
             patch.object(aggregator, "SkillsRelationFinder") as relation_finder,
@@ -183,6 +156,41 @@ class GraphCacheTests(unittest.TestCase):
                 "edges": [{"from_skill": "HTTP", "to_skill": "Node.js"}],
             },
         )
+
+    def test_normalize_profession_cache_key(self):
+        normalized = graph_cache.normalize_profession_cache_key(
+            "  Backend: Developer  "
+        )
+        self.assertEqual(normalized, "backend_developer")
+
+    def test_build_graph_cache_key(self):
+        cache_key = graph_cache.build_graph_cache_key("Backend Developer", True)
+        self.assertEqual(cache_key, "profession_graph:true:backend_developer")
+
+    def test_get_graph_cache_ttl_seconds_invalid_value(self):
+        with patch.dict(os.environ, {"GRAPH_CACHE_TTL_SECONDS": "oops"}):
+            ttl = graph_cache.get_graph_cache_ttl_seconds()
+        self.assertEqual(ttl, graph_cache.DEFAULT_GRAPH_CACHE_TTL_SECONDS)
+
+    def test_get_graph_cache_ttl_seconds_non_positive(self):
+        with patch.dict(os.environ, {"GRAPH_CACHE_TTL_SECONDS": "0"}):
+            ttl = graph_cache.get_graph_cache_ttl_seconds()
+        self.assertEqual(ttl, graph_cache.DEFAULT_GRAPH_CACHE_TTL_SECONDS)
+
+    def test_get_redis_client_success(self):
+        class FakeRedis:
+            @staticmethod
+            def from_url(_url, decode_responses=True):
+                return "client"
+
+        fake_module = types.SimpleNamespace(Redis=FakeRedis)
+
+        with patch.dict(sys.modules, {"redis": fake_module}):
+            graph_cache._redis_client = None
+            graph_cache._redis_client_initialized = False
+            client = graph_cache.get_redis_client()
+
+        self.assertEqual(client, "client")
 
 
 if __name__ == "__main__":
