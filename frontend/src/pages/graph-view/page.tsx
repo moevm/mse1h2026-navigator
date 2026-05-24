@@ -8,12 +8,13 @@ import {
   type NodeMouseHandler,
   type NodeTypes,
 } from "@xyflow/react";
-import { useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import {
   CheckCircle2,
+  Download,
   Filter,
   GitBranch,
   Home,
@@ -22,9 +23,15 @@ import {
   RefreshCw,
   Search,
   SlidersHorizontal,
+  Upload,
   X,
 } from "lucide-react";
 import "@xyflow/react/dist/style.css";
+import { GraphExportDialog } from "@/components/graph/GraphExportDialog";
+import { Button } from "@/components/ui/button";
+import { graphFileInputAccept, getGraphFileFormat } from "@/lib/graphFiles";
+import { parseTechnologyList } from "@/lib/parseTechnologyList";
+import { GraphProxy } from "./api/graphProxy";
 import { graphConfig } from "./config/graphSettings";
 import {
   GraphStoreProvider,
@@ -37,8 +44,6 @@ import {
 import { MainNode } from "./ui/mainNode.tsx";
 import { BasicNode } from "./ui/basicNode.tsx";
 import { NodeModal } from "./ui/nodeModal";
-import { Button } from "@/components/ui/button";
-import { parseTechnologyList } from "@/lib/parseTechnologyList";
 
 const defaultViewport = { x: 80, y: 80, zoom: 1.2 };
 
@@ -52,9 +57,13 @@ const GraphFlow = observer(() => {
   const nodeModalStore = useNodeModalStore();
   const navigate = useNavigate();
   const { graphId } = useParams<{ graphId: string }>();
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const [professionTitle, setProfessionTitle] = useState("");
   const [initialTechnologiesInput, setInitialTechnologiesInput] = useState("");
   const [isMock, setIsMock] = useState(false);
+  const [isImportingGraph, setIsImportingGraph] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [fileActionError, setFileActionError] = useState<string | null>(null);
   const [newNodeTitle, setNewNodeTitle] = useState("");
   const [newNodeDescription, setNewNodeDescription] = useState("");
   const [newNodeHours, setNewNodeHours] = useState(4);
@@ -120,6 +129,35 @@ const GraphFlow = observer(() => {
           navigate(`/graph/${createdGraphId}`, { replace: true });
         }
       });
+  };
+
+  const handleImportGraph = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    const format = getGraphFileFormat(file);
+    if (!format) {
+      setFileActionError("Выберите файл графа в формате .owl, .rdf, .xml или .ttl");
+      return;
+    }
+
+    setIsImportingGraph(true);
+    setFileActionError(null);
+
+    try {
+      const graph = await GraphProxy.importGraphFile(file, format);
+      navigate(`/graph/${graph.id}`, { replace: true });
+    } catch (error) {
+      setFileActionError(
+        error instanceof Error ? error.message : "Не удалось импортировать граф",
+      );
+    } finally {
+      setIsImportingGraph(false);
+    }
   };
 
   const handleAddNode = (event: FormEvent<HTMLFormElement>) => {
@@ -236,6 +274,49 @@ const GraphFlow = observer(() => {
             <Metric label="Видно" value={graphStore.visibleSkillsCount} />
             <Metric label="Часы" value={graphStore.totalHours} />
           </div>
+
+          <section className="space-y-3 rounded-md border border-slate-200 bg-white p-3 shadow-sm">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept={graphFileInputAccept}
+              className="hidden"
+              onChange={(event) => void handleImportGraph(event)}
+            />
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+              <Download className="size-4 text-slate-500" />
+              Файлы графа
+            </h2>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isImportingGraph}
+                onClick={() => importInputRef.current?.click()}
+              >
+                {isImportingGraph ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <Upload />
+                )}
+                Импортировать
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!graphStore.graphId}
+                onClick={() => setIsExportDialogOpen(true)}
+              >
+                <Download />
+                Экспортировать
+              </Button>
+            </div>
+            {fileActionError ? (
+              <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {fileActionError}
+              </p>
+            ) : null}
+          </section>
 
           <div className="rounded-md border border-emerald-200 bg-emerald-50/70 p-3">
             <div className="mb-2 flex items-center justify-between text-sm">
@@ -455,6 +536,12 @@ const GraphFlow = observer(() => {
         )}
 
         <NodeModal />
+        <GraphExportDialog
+          graphId={graphStore.graphId}
+          graphTitle={graphStore.professionTitle}
+          open={isExportDialogOpen}
+          onOpenChange={setIsExportDialogOpen}
+        />
       </main>
     </div>
   );

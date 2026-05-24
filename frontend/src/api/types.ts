@@ -33,6 +33,15 @@ export interface GraphListItem {
   updatedAt: string;
 }
 
+export type GraphFileFormat = "rdfxml" | "turtle";
+
+export interface GraphFileFormatMeta {
+  format: GraphFileFormat;
+  label: string;
+  extension: "owl" | "ttl";
+  contentType: "application/rdf+xml" | "text/turtle";
+}
+
 export interface GraphSearchParams {
   professionTitle: string;
   vacancyTitle?: string;
