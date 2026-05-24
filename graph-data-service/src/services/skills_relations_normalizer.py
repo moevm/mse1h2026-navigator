@@ -11,8 +11,8 @@ class SkillRelationNormalizer:
 
     def __init__(
         self,
-        skills_list,
         profession_name,
+        skills_list,
         hf_model_name=None,
     ):
         self._skills_list = skills_list
@@ -61,4 +61,6 @@ class SkillRelationNormalizer:
             ],
             max_retries=2,
         )
-        return result.edges
+        if isinstance(result, ProfessionRoadmap):
+            return result
+        return ProfessionRoadmap(edges=result.edges)

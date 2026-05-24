@@ -17,7 +17,7 @@ class SkillsRelationFinder:
         self._graph = nx.DiGraph()
         self._graph.add_nodes_from(skills_list)
 
-        self._uris_map = {skill: self._dbpedia_resource(skill) for skill in skills_list}
+        self._uris_map = {skill: self.__dbpedia_resource(skill) for skill in skills_list}
         print(f"[INIT] Profession: {profession_name}")
         print(f"[INIT] Skills list: {skills_list}")
         print(f"[INIT] Mapped skills to URIs: {self._uris_map}")
@@ -32,10 +32,10 @@ class SkillsRelationFinder:
                 continue
 
             print(f"[PROCESS] Finding links for '{skill}' ({source_uri})")
-            target_uris = self._find_links(source_uri)
+            target_uris = self.__find_links(source_uri)
 
             for target_uri in target_uris:
-                target_name = self._extract_name_from_uri(target_uri)
+                target_name = self.__extract_name_from_uri(target_uri)
                 for s in self._skills_list:
                     if target_name.lower() == s.lower():
                         edge = (skill, s)
@@ -49,7 +49,7 @@ class SkillsRelationFinder:
         print(f"[DONE] Total unique relations found: {len(relations)}")
         return relations
 
-    def _dbpedia_resource(self, name: str) -> str:
+    def __dbpedia_resource(self, name: str) -> str:
         query = f"""
         SELECT ?resource WHERE {{
           ?resource rdfs:label "{name}"@en .
@@ -68,7 +68,7 @@ class SkillsRelationFinder:
             print(f"[ERROR] Querying DBpedia for '{name}': {e}")
             return ""
 
-    def _find_links(self, source_uri: str) -> List[str]:
+    def __find_links(self, source_uri: str) -> List[str]:
         query = f"""
         PREFIX dbo: <http://dbpedia.org/ontology/>
         SELECT ?target
@@ -86,7 +86,7 @@ class SkillsRelationFinder:
             print(f"[ERROR] Querying {source_uri}: {e}")
             return []
 
-    def _extract_name_from_uri(self, uri: str) -> str:
+    def __extract_name_from_uri(self, uri: str) -> str:
         name = uri.split("/")[-1].replace("_", " ")
         if "(" in name:
             name = name.split("(")[0].strip()

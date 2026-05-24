@@ -71,8 +71,14 @@ def get_skill_graph_data(
     skills_relation_normalizer = SkillRelationNormalizer(job_title, skill_relations)
     normalized_relations = skills_relation_normalizer.get_normalized_relations()
 
-    node_names = get_node_names(normalized_relations)
+    relations_edges = (
+        normalized_relations.edges
+        if hasattr(normalized_relations, "edges")
+        else normalized_relations
+    )
+
+    node_names = list({*normalized_skills, *get_node_names(relations_edges)})
     return {
         "nodes": node_names,
-        "edges": normalized_relations,
+        "edges": relations_edges,
     }
