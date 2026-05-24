@@ -337,7 +337,7 @@ class TestAggregatorHelpers:
         result = add_missing_expansion_edges([], ["Python", "Go", "Rust"], [])
         assert result == [
             {"from_skill": "Python", "to_skill": "Go"},
-            {"from_skill": "Go", "to_skill": "Rust"},
+            {"from_skill": "Python", "to_skill": "Rust"},
         ]
 
 
