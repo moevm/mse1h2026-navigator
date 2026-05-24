@@ -10,7 +10,7 @@
 POST /graphql
 ```
 
-REST `/graphs` не является публичным интерфейсом для работы с графом. Логика редактирования вынесена во внутренний слой сервиса и вызывается из обработчика GraphQL.
+REST `/graphs` не является публичным интерфейсом для редактирования графа. Исключение — скачивание и загрузка графа во внешнем формате через `/graphs/:graphId/export` и `/graphs/import`.
 
 Для операций с сохраненными графами нужен заголовок авторизации:
 
@@ -28,6 +28,9 @@ Authorization: Bearer <app-token>
 - `backend/src/services/skillGraph/SkillGraphService.ts` — построение и обогащение графа из ветки `T41-Mappers-For-Graph`.
 - `backend/src/services/graphEditing/service.ts` — внутренняя прикладная логика сохранения и редактирования графа.
 - `backend/src/services/graphEditing/types.ts` — TypeScript-типы внутреннего слоя редактирования графа.
+- `backend/src/services/graphExport/service.ts` — общий фасад экспорта и импорта графа.
+- `backend/src/services/graphExport/RdfXmlGraphExporter.ts` и `TurtleGraphExporter.ts` — сериализация сохраненного графа в RDF/XML и Turtle.
+- `backend/src/services/graphExport/RdfXmlGraphImporter.ts` и `TurtleGraphImporter.ts` — восстановление графа из RDF/XML и Turtle.
 - `backend/prisma/schema.prisma` — схема MongoDB/Prisma.
 
 ## Хранение графа
@@ -319,6 +322,109 @@ query GraphSubgraph($graphId: String!, $nodeId: String!, $depth: Int!) {
 
 `depth` должен быть неотрицательным целым числом. Бэкенд ограничивает глубину максимумом `5`.
 
+## Экспорт графа в RDF/OWL
+
+Экспорт выполняется через REST-точку входа на backend-порту `3000`:
+
+```http
+GET /graphs/:graphId/export?format=rdfxml
+GET /graphs/:graphId/export?format=turtle
+```
+
+Нужен тот же заголовок авторизации:
+
+```http
+Authorization: Bearer <app-token>
+```
+
+Экспортируется текущая версия графа: `mainSkill`, `nodes`, `edges` и ресурсы внутри узлов. Поля исходного снимка `initialMainSkill`, `initialNodes`, `initialEdges` не используются.
+
+Параметр `format`:
+
+- `rdfxml` — RDF/XML, значение по умолчанию, файл `graph-<graphId>.owl`, `Content-Type: application/rdf+xml`;
+- `turtle` — Turtle, файл `graph-<graphId>.ttl`, `Content-Type: text/turtle`.
+
+Пример скачивания RDF/XML:
+
+```bash
+curl -L 'http://localhost:3000/graphs/GRAPH_ID/export?format=rdfxml' \
+  -H 'Authorization: Bearer <app-token>' \
+  -o graph.owl
+```
+
+Пример скачивания Turtle:
+
+```bash
+curl -L 'http://localhost:3000/graphs/GRAPH_ID/export?format=turtle' \
+  -H 'Authorization: Bearer <app-token>' \
+  -o graph.ttl
+```
+
+В RDF-модель попадают:
+
+- сам граф как `nav:SkillGraph`;
+- целевая профессия как `nav:MainSkill`;
+- навыки как `nav:Skill`;
+- связи обучения как `nav:requires` и `nav:dependsOn`;
+- курсы, книги и статьи как `nav:Course`, `nav:Book`, `nav:Article`;
+- пользовательские параметры узлов: `isCompleted`, `isRequired`, `isArchieved`, `priority`, `learnHours`.
+
+Если граф не принадлежит пользователю, ответ будет `404 Graph not found`. Если передан неизвестный формат, ответ будет `400 Unsupported export format`.
+
+## Импорт графа из RDF/OWL
+
+Импорт выполняется через REST-точку входа на backend-порту `3000`:
+
+```http
+POST /graphs/import?format=rdfxml
+POST /graphs/import?format=turtle
+```
+
+Точка входа создает новый граф для текущего пользователя. Существующий граф не перезаписывается. Если у пользователя уже есть граф с таким же названием профессии, сервер сохранит импортированный граф с безопасным названием вида `Backend Developer (import 2)`.
+
+Нужен заголовок авторизации:
+
+```http
+Authorization: Bearer <app-token>
+```
+
+Тело запроса — содержимое файла RDF/XML или Turtle. Поддерживаемые `Content-Type`:
+
+- `application/rdf+xml`;
+- `application/xml`;
+- `text/turtle`;
+- `text/plain`.
+
+Пример загрузки RDF/XML:
+
+```bash
+curl -X POST 'http://localhost:3000/graphs/import?format=rdfxml' \
+  -H 'Authorization: Bearer <app-token>' \
+  -H 'Content-Type: application/rdf+xml' \
+  --data-binary @graph.owl
+```
+
+Пример загрузки Turtle:
+
+```bash
+curl -X POST 'http://localhost:3000/graphs/import?format=turtle' \
+  -H 'Authorization: Bearer <app-token>' \
+  -H 'Content-Type: text/turtle' \
+  --data-binary @graph.ttl
+```
+
+Ответ `201` возвращает сохраненный `GraphResponse` с новым `id`. Импортированное состояние сразу записывается и как текущий граф, и как исходный снимок: `initialMainSkill`, `initialNodes`, `initialEdges`.
+
+Перед сохранением сервер проверяет:
+
+- наличие `nav:SkillGraph`, `nav:hasMainSkill` и хотя бы одного `nav:Skill`;
+- обязательные поля профессии, главного навыка и узлов;
+- уникальность идентификаторов узлов и ресурсов;
+- корректность чисел, логических значений и ссылок ресурсов;
+- отсутствие связей на неизвестные узлы.
+
+Если передан неизвестный формат, ответ будет `400 Unsupported import format`. Если файл не удалось разобрать или граф не прошел проверку, ответ будет `400` с описанием ошибки.
+
 ## Ошибки
 
 GraphQL возвращает ошибки в стандартном поле `errors`.
@@ -332,6 +438,9 @@ GraphQL возвращает ошибки в стандартном поле `er
 - `Graph edge already exists`
 - `Graph edge would create a cycle`
 - `Main skill cannot be deleted`
+- `Unsupported import format`
+- `Invalid graph import content`
+- `Edge references unknown target node: <nodeId>`
 
 ## Проверки
 
