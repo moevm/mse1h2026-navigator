@@ -28,6 +28,7 @@ Authorization: Bearer <app-token>
 - `backend/src/services/skillGraph/SkillGraphService.ts` — построение и обогащение графа из ветки `T41-Mappers-For-Graph`.
 - `backend/src/services/graphEditing/service.ts` — внутренняя прикладная логика сохранения и редактирования графа.
 - `backend/src/services/graphEditing/types.ts` — TypeScript-типы внутреннего слоя редактирования графа.
+- `backend/src/services/skillList/service.ts` — read-model для списочного представления сохраненного графа.
 - `backend/src/services/graphExport/service.ts` — общий фасад экспорта и импорта графа.
 - `backend/src/services/graphExport/RdfXmlGraphExporter.ts` и `TurtleGraphExporter.ts` — сериализация сохраненного графа в RDF/XML и Turtle.
 - `backend/src/services/graphExport/RdfXmlGraphImporter.ts` и `TurtleGraphImporter.ts` — восстановление графа из RDF/XML и Turtle.
@@ -150,6 +151,31 @@ query SavedGraph($graphId: String!) {
 ```
 
 Если граф принадлежит другому пользователю, обработчик вернет ошибку `Graph not found`.
+
+### Получить сохраненный граф списком
+
+```graphql
+query SavedGraphSkillList($graphId: String!) {
+  savedGraphSkillList(graphId: $graphId) {
+    graphId
+    professionTitle
+    currentPlan {
+      priority
+      skills { id title priority isCompleted isArchieved learnHours }
+    }
+    completedSkills { id title priority isCompleted isArchieved }
+    archivedSkills { id title priority isCompleted isArchieved }
+  }
+}
+```
+
+Этот запрос использует те же сохраненные `nodes`, что и графическое представление, но возвращает их в виде read-model для списка:
+
+- `currentPlan` — навыки без `isCompleted` и без `isArchieved`, сгруппированные по `priority`.
+- `completedSkills` — навыки с `isCompleted = true`, если они не архивированы.
+- `archivedSkills` — навыки с `isArchieved = true`.
+
+Группы приоритетов и навыки внутри групп возвращаются в стабильном порядке, чтобы интерфейс мог отображать список без дополнительной бизнес-логики.
 
 ### Получить исходный снимок графа
 

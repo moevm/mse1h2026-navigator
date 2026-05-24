@@ -8,6 +8,7 @@ import {
   GraphListItemGql,
   SavedSkillGraphGql,
   SkillGraphGql,
+  SkillListGql,
   UpdateGraphNodeInput,
   UpdateGraphNodeResultGql,
 } from "../types";
@@ -34,6 +35,7 @@ import type {
   UpdateGraphNodeRequest,
   UpdateGraphNodeResponse,
 } from "../../services/graphEditing/types";
+import { buildSkillList } from "../../services/skillList/service";
 
 @injectable()
 @Resolver()
@@ -81,6 +83,20 @@ export class SkillGraphResolver {
   ): Promise<SavedSkillGraphGql> {
     const user = requireGraphQLUser(context);
     return this.toSavedSkillGraphGql(await getUserGraph(user.id, graphId));
+  }
+
+  @Query(() => SkillListGql, {
+    description: "Списочное представление сохраненного графа навыков",
+  })
+  async savedGraphSkillList(
+    @Arg("graphId") graphId: string,
+    @Ctx() context: GraphQLContext
+  ): Promise<SkillListGql> {
+    const user = requireGraphQLUser(context);
+    return Object.assign(
+      new SkillListGql(),
+      buildSkillList(await getUserGraph(user.id, graphId))
+    );
   }
 
   @Query(() => SavedSkillGraphGql, {

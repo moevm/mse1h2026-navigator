@@ -317,6 +317,194 @@ describe("skill graph GraphQL integration", () => {
     expect(forbiddenResponse.body.errors?.[0]?.message).toBe("Graph not found");
   });
 
+  it("returns saved graph skills grouped for list view", async () => {
+    const user = await createTestUser("skill-list-owner");
+    const otherUser = await createTestUser("skill-list-other");
+    const graph = await createTestGraph(user.id, "skill-list-owner");
+    const otherGraph = await createTestGraph(otherUser.id, "skill-list-other");
+
+    await prisma.graph.update({
+      where: { id: graph.id },
+      data: {
+        nodes: [
+          {
+            id: "skill-a",
+            title: "HTTP",
+            description: "",
+            isCompleted: false,
+            isRequired: true,
+            isArchieved: false,
+            priority: 1,
+            learnHours: 4,
+            courses: [],
+            books: [],
+            articles: [],
+          },
+          {
+            id: "skill-b",
+            title: "Node.js",
+            description: "",
+            isCompleted: true,
+            isRequired: true,
+            isArchieved: false,
+            priority: 2,
+            learnHours: 12,
+            courses: [],
+            books: [],
+            articles: [],
+          },
+          {
+            id: "skill-c",
+            title: "Databases",
+            description: "",
+            isCompleted: false,
+            isRequired: false,
+            isArchieved: true,
+            priority: 0,
+            learnHours: 10,
+            courses: [],
+            books: [],
+            articles: [],
+          },
+          {
+            id: "skill-d",
+            title: "CSS",
+            description: "",
+            isCompleted: false,
+            isRequired: true,
+            isArchieved: false,
+            priority: 0,
+            learnHours: 3,
+            courses: [],
+            books: [],
+            articles: [],
+          },
+          {
+            id: "skill-e",
+            title: "Algorithms",
+            description: "",
+            isCompleted: false,
+            isRequired: true,
+            isArchieved: false,
+            priority: 0,
+            learnHours: 16,
+            courses: [],
+            books: [],
+            articles: [],
+          },
+          {
+            id: "skill-f",
+            title: "Legacy Framework",
+            description: "",
+            isCompleted: true,
+            isRequired: false,
+            isArchieved: true,
+            priority: 3,
+            learnHours: 1,
+            courses: [],
+            books: [],
+            articles: [],
+          },
+        ],
+      },
+    });
+
+    const response = await gql({
+      userId: user.id,
+      query: `
+        query SavedGraphSkillList($graphId: String!) {
+          savedGraphSkillList(graphId: $graphId) {
+            graphId
+            professionTitle
+            currentPlan {
+              priority
+              skills { id title priority isCompleted isArchieved learnHours }
+            }
+            completedSkills { id title priority isCompleted isArchieved }
+            archivedSkills { id title priority isCompleted isArchieved }
+          }
+        }
+      `,
+      variables: { graphId: graph.id },
+    });
+
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.savedGraphSkillList.graphId).toBe(graph.id);
+    expect(response.body.data.savedGraphSkillList.currentPlan).toEqual([
+      {
+        priority: 0,
+        skills: [
+          {
+            id: "skill-e",
+            title: "Algorithms",
+            priority: 0,
+            isCompleted: false,
+            isArchieved: false,
+            learnHours: 16,
+          },
+          {
+            id: "skill-d",
+            title: "CSS",
+            priority: 0,
+            isCompleted: false,
+            isArchieved: false,
+            learnHours: 3,
+          },
+        ],
+      },
+      {
+        priority: 1,
+        skills: [
+          {
+            id: "skill-a",
+            title: "HTTP",
+            priority: 1,
+            isCompleted: false,
+            isArchieved: false,
+            learnHours: 4,
+          },
+        ],
+      },
+    ]);
+    expect(response.body.data.savedGraphSkillList.completedSkills).toEqual([
+      {
+        id: "skill-b",
+        title: "Node.js",
+        priority: 2,
+        isCompleted: true,
+        isArchieved: false,
+      },
+    ]);
+    expect(response.body.data.savedGraphSkillList.archivedSkills).toEqual([
+      {
+        id: "skill-c",
+        title: "Databases",
+        priority: 0,
+        isCompleted: false,
+        isArchieved: true,
+      },
+      {
+        id: "skill-f",
+        title: "Legacy Framework",
+        priority: 3,
+        isCompleted: true,
+        isArchieved: true,
+      },
+    ]);
+
+    const forbiddenResponse = await gql({
+      userId: user.id,
+      query: `
+        query SavedGraphSkillList($graphId: String!) {
+          savedGraphSkillList(graphId: $graphId) { graphId }
+        }
+      `,
+      variables: { graphId: otherGraph.id },
+    });
+
+    expect(forbiddenResponse.body.errors?.[0]?.message).toBe("Graph not found");
+  });
+
   it("exports an owned graph as RDF/XML and Turtle through REST", async () => {
     const user = await createTestUser("export");
     const graph = await createTestGraph(user.id, "export");
