@@ -10,7 +10,7 @@ import {
 } from "@xyflow/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import {
   CheckCircle2,
@@ -45,6 +45,7 @@ import { MainNode } from "./ui/mainNode.tsx";
 import { BasicNode } from "./ui/basicNode.tsx";
 import { NodeModal } from "./ui/nodeModal";
 import {DownloadButton} from "@/components/graph/ImageDownloadButton.tsx";
+import { GraphViewSwitcher } from "./ui/GraphViewSwitcher";
 
 const defaultViewport = { x: 80, y: 80, zoom: 1.2 };
 
@@ -58,6 +59,9 @@ const GraphFlow = observer(() => {
   const nodeModalStore = useNodeModalStore();
   const navigate = useNavigate();
   const { graphId } = useParams<{ graphId: string }>();
+  const [searchParams] = useSearchParams();
+  const subgraphNodeId = searchParams.get("subgraphNodeId");
+  const subgraphDepth = Number(searchParams.get("depth") ?? "1");
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const [professionTitle, setProfessionTitle] = useState("");
   const [initialTechnologiesInput, setInitialTechnologiesInput] = useState("");
@@ -82,8 +86,15 @@ const GraphFlow = observer(() => {
       navigate("/", { replace: true });
       return;
     }
-    void graphStore.openSavedGraph(graphId);
-  }, [graphId, graphStore, navigate]);
+    void graphStore.openSavedGraph(graphId).then(() => {
+      if (!subgraphNodeId) {
+        return;
+      }
+
+      const depth = Number.isFinite(subgraphDepth) ? subgraphDepth : 1;
+      void graphStore.showSubgraph(subgraphNodeId, depth);
+    });
+  }, [graphId, graphStore, navigate, subgraphDepth, subgraphNodeId]);
 
   useEffect(() => {
     if (graphStore.professionTitle) {
@@ -227,6 +238,7 @@ const GraphFlow = observer(() => {
                 Главная
               </Link>
             </Button>
+            <GraphViewSwitcher graphId={graphId} activeView="graph" />
 
             <label className="block text-sm font-medium text-slate-700">
               Профессия
