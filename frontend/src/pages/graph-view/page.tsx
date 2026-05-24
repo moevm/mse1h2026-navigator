@@ -44,6 +44,7 @@ import {
 import { MainNode } from "./ui/mainNode.tsx";
 import { BasicNode } from "./ui/basicNode.tsx";
 import { NodeModal } from "./ui/nodeModal";
+import {DownloadButton} from "@/components/graph/ImageDownloadButton.tsx";
 
 const defaultViewport = { x: 80, y: 80, zoom: 1.2 };
 
@@ -510,6 +511,7 @@ const GraphFlow = observer(() => {
           >
             <Background color="#cbd5e1" gap={18} />
             <MiniMap pannable zoomable nodeStrokeWidth={3} />
+            <DownloadButton/>
             <Controls />
           </ReactFlow>
         ) : (
