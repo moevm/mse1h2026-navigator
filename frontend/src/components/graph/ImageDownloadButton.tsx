@@ -1,7 +1,7 @@
 import { Panel, useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
 import { toPng } from 'html-to-image';
 
-function downloadImage(dataUrl: Element | null) {
+function downloadImage(dataUrl: string) {
     const a = document.createElement('a');
 
     a.setAttribute('download', 'reactflow.png');
@@ -15,16 +15,21 @@ const imageHeight = 768;
 export function DownloadButton() {
     const { getNodes } = useReactFlow();
     const onClick = () => {
-        const nodesBounds = getNodesBounds(getNodes());
-        const viewport = getViewportForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2);
+        const viewportElement = document.querySelector<HTMLElement>('.react-flow__viewport');
+        if (!viewportElement) {
+            return;
+        }
 
-        toPng(document.querySelector('.react-flow__viewport'), {
+        const nodesBounds = getNodesBounds(getNodes());
+        const viewport = getViewportForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2, 0.1);
+
+        toPng(viewportElement, {
             backgroundColor: '#1a365d',
             width: imageWidth,
             height: imageHeight,
             style: {
-                width: imageWidth,
-                height: imageHeight,
+                width: `${imageWidth}px`,
+                height: `${imageHeight}px`,
                 transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
             },
         }).then(downloadImage);
