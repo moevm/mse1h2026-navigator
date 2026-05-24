@@ -41,6 +41,10 @@ interface BuiltGraphData {
   edges: SkillsRelation[];
 }
 
+interface ImportedUserGraphData extends BuiltGraphData {
+  professionTitle: string;
+}
+
 interface BuiltLearningTimeInfo {
   minHours: number;
   avgHours: number;
@@ -487,6 +491,44 @@ export async function createOrLoadUserGraph(params: {
   return mapGraphResponse(graph as GraphWithData);
 }
 
+export async function importUserGraph(params: {
+  userId: string;
+  graphData: ImportedUserGraphData;
+}): Promise<GraphResponse> {
+  const { userId, graphData } = params;
+  const professionTitle = graphData.professionTitle.trim();
+
+  if (!professionTitle) {
+    throw new GraphServiceError(400, "professionTitle is required");
+  }
+
+  const uniqueProfessionTitle = await buildUniqueImportedProfessionTitle(
+    userId,
+    professionTitle
+  );
+  const normalizedProfessionTitle = normalizeProfessionTitle(uniqueProfessionTitle);
+  const graphSnapshotData = buildGraphSnapshotData(
+    normalizeBuiltGraphData({
+      mainSkill: graphData.mainSkill,
+      nodes: graphData.nodes,
+      edges: graphData.edges,
+    })
+  );
+
+  const graph = await prisma.graph.create({
+    data: {
+      userId,
+      professionTitle: uniqueProfessionTitle,
+      normalizedProfessionTitle,
+      ...graphSnapshotData,
+    },
+  });
+
+  await syncCompletedUserSkills(userId);
+
+  return mapGraphResponse(graph as GraphWithData);
+}
+
 export async function resetUserGraphToInitial(
   userId: string,
   graphId: string
@@ -504,6 +546,31 @@ export async function resetUserGraphToInitial(
   await syncCompletedUserSkills(userId);
 
   return mapGraphResponse(updatedGraph as GraphWithData);
+}
+
+async function buildUniqueImportedProfessionTitle(
+  userId: string,
+  baseTitle: string
+): Promise<string> {
+  const trimmedBaseTitle = baseTitle.trim();
+  let candidateTitle = trimmedBaseTitle;
+  let suffix = 2;
+
+  while (
+    await prisma.graph.findUnique({
+      where: {
+        userId_normalizedProfessionTitle: {
+          userId,
+          normalizedProfessionTitle: normalizeProfessionTitle(candidateTitle),
+        },
+      },
+    })
+  ) {
+    candidateTitle = `${trimmedBaseTitle} (import ${suffix})`;
+    suffix += 1;
+  }
+
+  return candidateTitle;
 }
 
 function assertStringField(
