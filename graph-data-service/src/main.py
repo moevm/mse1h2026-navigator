@@ -20,10 +20,12 @@ def get_profession_graph(request: ProfessionRequest):
     print(f"is_mock: {request.is_mock}, use_cache: {request.use_cache}")
     print(f"initial_technologies: {request.initial_technologies or []}")
 
+    use_cache = request.use_cache if "use_cache" in request.model_fields_set else False
+
     result = get_skill_graph_data(
         job_title=request.profession_title,
         initial_technologies=request.initial_technologies or [],
         is_mock=request.is_mock or False,
-        use_cache=request.use_cache or False,
+        use_cache=use_cache or False,
     )
     return result

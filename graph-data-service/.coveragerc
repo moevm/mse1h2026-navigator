@@ -1,0 +1,4 @@
+[run]
+omit =
+    src/services/skills_finder.py
+    src/services/skills_relation_finder.py
