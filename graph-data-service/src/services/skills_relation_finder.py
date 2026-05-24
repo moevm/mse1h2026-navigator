@@ -96,3 +96,9 @@ class SkillsRelationFinder:
         if "(" in name:
             name = name.split("(")[0].strip()
         return name
+
+    def _create_sparql(self) -> SPARQLWrapper:
+        sparql = SPARQLWrapper(self._endpoint)
+        sparql.setReturnFormat(JSON)
+        sparql.setTimeout(self._timeout)
+        return sparql

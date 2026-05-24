@@ -1,39 +1,8 @@
 import json
 import os
-import sys
-import types
 import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
-
-
-class PlaceholderService:
-    pass
-
-
-def stub_service_module(module_name, **attrs):
-    module = types.ModuleType(module_name)
-    for attr_name, attr_value in attrs.items():
-        setattr(module, attr_name, attr_value)
-    sys.modules[module_name] = module
-
-
-stub_service_module(
-    "src.services.skills_finder",
-    SkillsFinder=PlaceholderService,
-)
-stub_service_module(
-    "src.services.skills_normalizer",
-    SkillsNormalizer=PlaceholderService,
-)
-stub_service_module(
-    "src.services.skills_relation_finder",
-    SkillsRelationFinder=PlaceholderService,
-)
-stub_service_module(
-    "src.services.skills_relations_normalizer",
-    SkillRelationNormalizer=PlaceholderService,
-)
 
 from src.services import aggregator
 from src.services import graph_cache
@@ -73,6 +42,7 @@ class GraphCacheTests(unittest.TestCase):
         edge = SimpleNamespace(from_skill="HTTP", to_skill="Node.js")
 
         with (
+            patch.dict(os.environ, {"GRAPH_DATA_SERVICE_USE_DISK_CACHE": "false"}),
             patch.object(aggregator, "get_cached_graph", return_value=None),
             patch.object(aggregator, "set_cached_graph") as set_cached_graph,
             patch.object(aggregator, "SkillsFinder") as skills_finder,
@@ -137,6 +107,7 @@ class GraphCacheTests(unittest.TestCase):
         edge = SimpleNamespace(from_skill="HTTP", to_skill="Node.js")
 
         with (
+            patch.dict(os.environ, {"GRAPH_DATA_SERVICE_USE_DISK_CACHE": "false"}),
             patch.object(aggregator, "SkillsFinder") as skills_finder,
             patch.object(aggregator, "SkillsNormalizer") as skills_normalizer,
             patch.object(aggregator, "SkillsRelationFinder") as relation_finder,

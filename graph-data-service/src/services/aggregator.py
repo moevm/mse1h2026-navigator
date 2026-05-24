@@ -8,7 +8,7 @@ from ..services.skills_normalizer import SkillsNormalizer
 from ..services.skills_relation_finder import SkillsRelationFinder
 from ..services.skills_relations_normalizer import SkillRelationNormalizer
 
-DEFAULT_MAX_GRAPH_SKILLS = 45
+DEFAULT_MAX_GRAPH_SKILLS = 0
 
 
 def get_node_names(skill_relations):
@@ -62,7 +62,7 @@ def limit_skill_list(skills, initial_technologies):
 
 
 def should_use_relation_llm():
-    return os.getenv("GRAPH_DATA_SERVICE_USE_RELATION_LLM", "false").lower() in [
+    return os.getenv("GRAPH_DATA_SERVICE_USE_RELATION_LLM", "true").lower() in [
         "1",
         "true",
         "yes",
@@ -70,7 +70,15 @@ def should_use_relation_llm():
 
 
 def should_use_skills_llm():
-    return os.getenv("GRAPH_DATA_SERVICE_USE_SKILLS_LLM", "false").lower() in [
+    return os.getenv("GRAPH_DATA_SERVICE_USE_SKILLS_LLM", "true").lower() in [
+        "1",
+        "true",
+        "yes",
+    ]
+
+
+def should_use_disk_cache():
+    return os.getenv("GRAPH_DATA_SERVICE_USE_DISK_CACHE", "true").lower() in [
         "1",
         "true",
         "yes",
@@ -233,7 +241,9 @@ def get_skill_graph_data(
     skills_file_path = f"cache/normalized_skills_{safe_job_title}.json"
     relations_file_path = f"cache/skill_relations_{safe_job_title}.json"
 
-    if use_cache and os.path.exists(skills_file_path):
+    use_disk_cache = use_cache and should_use_disk_cache()
+
+    if use_disk_cache and os.path.exists(skills_file_path):
         with open(skills_file_path, "r", encoding="utf-8") as f:
             normalized_skills = json.load(f)
         print(f"Loaded skills from cache: {skills_file_path}")
@@ -269,13 +279,13 @@ def get_skill_graph_data(
         )
         normalized_skills = limit_skill_list(normalized_skills, initial_technologies)
 
-        if use_cache:
+        if use_disk_cache:
             os.makedirs("cache", exist_ok=True)
             with open(skills_file_path, "w", encoding="utf-8") as f:
                 json.dump(normalized_skills, f, ensure_ascii=False, indent=4)
             print(f"Saved skills to cache: {skills_file_path}")
 
-    if use_cache and os.path.exists(relations_file_path):
+    if use_disk_cache and os.path.exists(relations_file_path):
         with open(relations_file_path, "r", encoding="utf-8") as f:
             skill_relations = json.load(f)
         print(f"Loaded relations from cache: {relations_file_path}")
@@ -283,7 +293,7 @@ def get_skill_graph_data(
         skills_relation_finder = SkillsRelationFinder(job_title, normalized_skills)
         skill_relations = skills_relation_finder.find_skill_relations()
 
-        if use_cache:
+        if use_disk_cache:
             os.makedirs("cache", exist_ok=True)
             with open(relations_file_path, "w", encoding="utf-8") as f:
                 json.dump(skill_relations, f, ensure_ascii=False, indent=4)
@@ -297,9 +307,7 @@ def get_skill_graph_data(
                 normalize_edges(skill_relations),
                 initial_technologies,
             )
-            normalized_relations = normalize_edges(
-                skills_relation_normalizer.get_normalized_relations()
-            )
+            normalized_relations = skills_relation_normalizer.get_normalized_relations()
         except Exception as error:
             print(
                 f"Relation LLM normalization failed, using DBpedia relations: {error}"
@@ -316,11 +324,10 @@ def get_skill_graph_data(
     )
 
     node_names = list({*normalized_skills, *get_node_names(relations_edges)})
-    return {
+    graph_data = {
         "nodes": node_names,
         "edges": relations_edges,
     }
-
     if use_cache:
         set_cached_graph(job_title, is_mock, graph_data)
 

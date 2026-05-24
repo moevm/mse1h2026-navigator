@@ -14,11 +14,14 @@ class SkillRelationNormalizer:
         self,
         profession_name,
         skills_list,
+        candidate_relations=None,
+        initial_technologies=None,
         hf_model_name=None,
     ):
         self._profession_name = profession_name
-        self._available_skills = available_skills
-        self._candidate_relations = candidate_relations
+        self._skills_list = skills_list
+        self._available_skills = skills_list
+        self._candidate_relations = candidate_relations or []
         self._initial_technologies = initial_technologies or []
         self._hf_model_name = hf_model_name or os.environ.get("HF_MODEL_NAME")
         self._hf_token = os.environ["HF_TOKEN"]
