@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xmlns:nav="https://mse1h2026-navigator.local/ontology#">
+  <owl:Ontology rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde">
+    <rdfs:label>Backend beginner skill graph</rdfs:label>
+  </owl:Ontology>
+  <nav:SkillGraph rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde">
+    <rdfs:label>Backend beginner</rdfs:label>
+    <nav:hasMainSkill rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/backend-beginner"/>
+    <nav:hasSkill rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/github"/>
+    <nav:hasSkill rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/code-refactoring"/>
+    <nav:hasSkill rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/test-driven-development"/>
+    <nav:hasSkill rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/git"/>
+    <nav:hasSkill rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/debugging"/>
+    <nav:hasSkill rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/modular-programming"/>
+    <nav:hasSkill rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/version-control"/>
+    <nav:hasSkill rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/software-testing"/>
+  </nav:SkillGraph>
+  <nav:MainSkill rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/backend-beginner">
+    <rdfs:label>Backend beginner</rdfs:label>
+    <dcterms:description>Граф навыков для профессии «Backend beginner»</dcterms:description>
+  </nav:MainSkill>
+  <nav:Skill rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/github">
+    <rdfs:label>GitHub</rdfs:label>
+    <dcterms:description>GitHub — ключевой навык для профессионального разработчика</dcterms:description>
+    <nav:isCompleted rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isCompleted>
+    <nav:isRequired rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</nav:isRequired>
+    <nav:isArchieved rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isArchieved>
+    <nav:priority rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</nav:priority>
+    <nav:learnHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:learnHours>
+    <nav:hasCourse rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-github"/>
+    <nav:hasBook rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-github"/>
+    <nav:hasArticle rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-github"/>
+  </nav:Skill>
+  <nav:Skill rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/code-refactoring">
+    <rdfs:label>Code refactoring</rdfs:label>
+    <dcterms:description>Code refactoring — ключевой навык для профессионального разработчика</dcterms:description>
+    <nav:isCompleted rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isCompleted>
+    <nav:isRequired rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</nav:isRequired>
+    <nav:isArchieved rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isArchieved>
+    <nav:priority rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</nav:priority>
+    <nav:learnHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:learnHours>
+    <nav:hasCourse rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-code-refactoring"/>
+    <nav:hasBook rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-code-refactoring"/>
+    <nav:hasArticle rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-code-refactoring"/>
+    <nav:dependsOn rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/modular-programming"/>
+  </nav:Skill>
+  <nav:Skill rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/test-driven-development">
+    <rdfs:label>Test-driven development</rdfs:label>
+    <dcterms:description>Test-driven development — ключевой навык для профессионального разработчика</dcterms:description>
+    <nav:isCompleted rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isCompleted>
+    <nav:isRequired rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</nav:isRequired>
+    <nav:isArchieved rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isArchieved>
+    <nav:priority rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</nav:priority>
+    <nav:learnHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:learnHours>
+    <nav:hasCourse rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-test-driven-development"/>
+    <nav:hasBook rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-test-driven-development"/>
+    <nav:hasArticle rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-test-driven-development"/>
+    <nav:dependsOn rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/software-testing"/>
+    <nav:dependsOn rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/code-refactoring"/>
+  </nav:Skill>
+  <nav:Skill rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/git">
+    <rdfs:label>Git</rdfs:label>
+    <dcterms:description>Git — ключевой навык для профессионального разработчика</dcterms:description>
+    <nav:isCompleted rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isCompleted>
+    <nav:isRequired rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</nav:isRequired>
+    <nav:isArchieved rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isArchieved>
+    <nav:priority rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</nav:priority>
+    <nav:learnHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:learnHours>
+    <nav:hasCourse rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-git"/>
+    <nav:hasBook rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-git"/>
+    <nav:hasArticle rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-git"/>
+    <nav:dependsOn rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/version-control"/>
+    <nav:dependsOn rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/github"/>
+  </nav:Skill>
+  <nav:Skill rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/debugging">
+    <rdfs:label>Debugging</rdfs:label>
+    <dcterms:description>Debugging — ключевой навык для профессионального разработчика</dcterms:description>
+    <nav:isCompleted rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isCompleted>
+    <nav:isRequired rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</nav:isRequired>
+    <nav:isArchieved rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isArchieved>
+    <nav:priority rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</nav:priority>
+    <nav:learnHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:learnHours>
+    <nav:hasCourse rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-debugging"/>
+    <nav:hasBook rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-debugging"/>
+    <nav:hasArticle rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-debugging"/>
+    <nav:dependsOn rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/git"/>
+  </nav:Skill>
+  <nav:Skill rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/modular-programming">
+    <rdfs:label>Modular programming</rdfs:label>
+    <dcterms:description>Modular programming — ключевой навык для профессионального разработчика</dcterms:description>
+    <nav:isCompleted rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isCompleted>
+    <nav:isRequired rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</nav:isRequired>
+    <nav:isArchieved rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isArchieved>
+    <nav:priority rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</nav:priority>
+    <nav:learnHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:learnHours>
+    <nav:hasCourse rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-modular-programming"/>
+    <nav:hasBook rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-modular-programming"/>
+    <nav:hasArticle rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-modular-programming"/>
+  </nav:Skill>
+  <nav:Skill rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/version-control">
+    <rdfs:label>Version control</rdfs:label>
+    <dcterms:description>Version control — ключевой навык для профессионального разработчика</dcterms:description>
+    <nav:isCompleted rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isCompleted>
+    <nav:isRequired rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</nav:isRequired>
+    <nav:isArchieved rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isArchieved>
+    <nav:priority rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</nav:priority>
+    <nav:learnHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:learnHours>
+    <nav:hasCourse rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-version-control"/>
+    <nav:hasBook rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-version-control"/>
+    <nav:hasArticle rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-version-control"/>
+  </nav:Skill>
+  <nav:Skill rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/software-testing">
+    <rdfs:label>Software testing</rdfs:label>
+    <dcterms:description>Software testing — ключевой навык для профессионального разработчика</dcterms:description>
+    <nav:isCompleted rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isCompleted>
+    <nav:isRequired rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</nav:isRequired>
+    <nav:isArchieved rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</nav:isArchieved>
+    <nav:priority rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</nav:priority>
+    <nav:learnHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:learnHours>
+    <nav:hasCourse rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-software-testing"/>
+    <nav:hasBook rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-software-testing"/>
+    <nav:hasArticle rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-software-testing"/>
+    <nav:dependsOn rdf:resource="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/skills/debugging"/>
+  </nav:Skill>
+  <nav:Course rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-github">
+    <rdfs:label>GitHub — полный курс</rdfs:label>
+    <dcterms:description>Изучите GitHub с нуля до профессионального уровня</dcterms:description>
+    <nav:link rdf:resource="https://stepik.org/search?q=GitHub"/>
+    <nav:minHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">10</nav:minHours>
+    <nav:avgHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:avgHours>
+    <nav:maxHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">40</nav:maxHours>
+    <nav:coursesAnalyzed rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</nav:coursesAnalyzed>
+  </nav:Course>
+  <nav:Book rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-github">
+    <rdfs:label>Mastering GitHub</rdfs:label>
+    <dcterms:creator>Mock Author</dcterms:creator>
+    <dcterms:description>Comprehensive guide to GitHub</dcterms:description>
+    <nav:link rdf:resource="https://openlibrary.org/search?q=GitHub"/>
+  </nav:Book>
+  <nav:Article rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-github">
+    <rdfs:label>Введение в GitHub</rdfs:label>
+    <dcterms:description>Обзорная статья про GitHub для начинающих</dcterms:description>
+    <nav:link rdf:resource="https://habr.com/ru/search/?q=GitHub"/>
+    <nav:rating rdf:datatype="http://www.w3.org/2001/XMLSchema#double">42</nav:rating>
+    <nav:tag>github</nav:tag>
+    <nav:tag>tutorial</nav:tag>
+  </nav:Article>
+  <nav:Course rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-code-refactoring">
+    <rdfs:label>Code refactoring — полный курс</rdfs:label>
+    <dcterms:description>Изучите Code refactoring с нуля до профессионального уровня</dcterms:description>
+    <nav:link rdf:resource="https://stepik.org/search?q=Code%20refactoring"/>
+    <nav:minHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">10</nav:minHours>
+    <nav:avgHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:avgHours>
+    <nav:maxHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">40</nav:maxHours>
+    <nav:coursesAnalyzed rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</nav:coursesAnalyzed>
+  </nav:Course>
+  <nav:Book rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-code-refactoring">
+    <rdfs:label>Mastering Code refactoring</rdfs:label>
+    <dcterms:creator>Mock Author</dcterms:creator>
+    <dcterms:description>Comprehensive guide to Code refactoring</dcterms:description>
+    <nav:link rdf:resource="https://openlibrary.org/search?q=Code%20refactoring"/>
+  </nav:Book>
+  <nav:Article rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-code-refactoring">
+    <rdfs:label>Введение в Code refactoring</rdfs:label>
+    <dcterms:description>Обзорная статья про Code refactoring для начинающих</dcterms:description>
+    <nav:link rdf:resource="https://habr.com/ru/search/?q=Code%20refactoring"/>
+    <nav:rating rdf:datatype="http://www.w3.org/2001/XMLSchema#double">42</nav:rating>
+    <nav:tag>code refactoring</nav:tag>
+    <nav:tag>tutorial</nav:tag>
+  </nav:Article>
+  <nav:Course rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-test-driven-development">
+    <rdfs:label>Test-driven development — полный курс</rdfs:label>
+    <dcterms:description>Изучите Test-driven development с нуля до профессионального уровня</dcterms:description>
+    <nav:link rdf:resource="https://stepik.org/search?q=Test-driven%20development"/>
+    <nav:minHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">10</nav:minHours>
+    <nav:avgHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:avgHours>
+    <nav:maxHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">40</nav:maxHours>
+    <nav:coursesAnalyzed rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</nav:coursesAnalyzed>
+  </nav:Course>
+  <nav:Book rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-test-driven-development">
+    <rdfs:label>Mastering Test-driven development</rdfs:label>
+    <dcterms:creator>Mock Author</dcterms:creator>
+    <dcterms:description>Comprehensive guide to Test-driven development</dcterms:description>
+    <nav:link rdf:resource="https://openlibrary.org/search?q=Test-driven%20development"/>
+  </nav:Book>
+  <nav:Article rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-test-driven-development">
+    <rdfs:label>Введение в Test-driven development</rdfs:label>
+    <dcterms:description>Обзорная статья про Test-driven development для начинающих</dcterms:description>
+    <nav:link rdf:resource="https://habr.com/ru/search/?q=Test-driven%20development"/>
+    <nav:rating rdf:datatype="http://www.w3.org/2001/XMLSchema#double">42</nav:rating>
+    <nav:tag>test-driven development</nav:tag>
+    <nav:tag>tutorial</nav:tag>
+  </nav:Article>
+  <nav:Course rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-git">
+    <rdfs:label>Git — полный курс</rdfs:label>
+    <dcterms:description>Изучите Git с нуля до профессионального уровня</dcterms:description>
+    <nav:link rdf:resource="https://stepik.org/search?q=Git"/>
+    <nav:minHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">10</nav:minHours>
+    <nav:avgHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:avgHours>
+    <nav:maxHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">40</nav:maxHours>
+    <nav:coursesAnalyzed rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</nav:coursesAnalyzed>
+  </nav:Course>
+  <nav:Book rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-git">
+    <rdfs:label>Mastering Git</rdfs:label>
+    <dcterms:creator>Mock Author</dcterms:creator>
+    <dcterms:description>Comprehensive guide to Git</dcterms:description>
+    <nav:link rdf:resource="https://openlibrary.org/search?q=Git"/>
+  </nav:Book>
+  <nav:Article rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-git">
+    <rdfs:label>Введение в Git</rdfs:label>
+    <dcterms:description>Обзорная статья про Git для начинающих</dcterms:description>
+    <nav:link rdf:resource="https://habr.com/ru/search/?q=Git"/>
+    <nav:rating rdf:datatype="http://www.w3.org/2001/XMLSchema#double">42</nav:rating>
+    <nav:tag>git</nav:tag>
+    <nav:tag>tutorial</nav:tag>
+  </nav:Article>
+  <nav:Course rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-debugging">
+    <rdfs:label>Debugging — полный курс</rdfs:label>
+    <dcterms:description>Изучите Debugging с нуля до профессионального уровня</dcterms:description>
+    <nav:link rdf:resource="https://stepik.org/search?q=Debugging"/>
+    <nav:minHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">10</nav:minHours>
+    <nav:avgHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:avgHours>
+    <nav:maxHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">40</nav:maxHours>
+    <nav:coursesAnalyzed rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</nav:coursesAnalyzed>
+  </nav:Course>
+  <nav:Book rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-debugging">
+    <rdfs:label>Mastering Debugging</rdfs:label>
+    <dcterms:creator>Mock Author</dcterms:creator>
+    <dcterms:description>Comprehensive guide to Debugging</dcterms:description>
+    <nav:link rdf:resource="https://openlibrary.org/search?q=Debugging"/>
+  </nav:Book>
+  <nav:Article rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-debugging">
+    <rdfs:label>Введение в Debugging</rdfs:label>
+    <dcterms:description>Обзорная статья про Debugging для начинающих</dcterms:description>
+    <nav:link rdf:resource="https://habr.com/ru/search/?q=Debugging"/>
+    <nav:rating rdf:datatype="http://www.w3.org/2001/XMLSchema#double">42</nav:rating>
+    <nav:tag>debugging</nav:tag>
+    <nav:tag>tutorial</nav:tag>
+  </nav:Article>
+  <nav:Course rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-modular-programming">
+    <rdfs:label>Modular programming — полный курс</rdfs:label>
+    <dcterms:description>Изучите Modular programming с нуля до профессионального уровня</dcterms:description>
+    <nav:link rdf:resource="https://stepik.org/search?q=Modular%20programming"/>
+    <nav:minHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">10</nav:minHours>
+    <nav:avgHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:avgHours>
+    <nav:maxHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">40</nav:maxHours>
+    <nav:coursesAnalyzed rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</nav:coursesAnalyzed>
+  </nav:Course>
+  <nav:Book rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-modular-programming">
+    <rdfs:label>Mastering Modular programming</rdfs:label>
+    <dcterms:creator>Mock Author</dcterms:creator>
+    <dcterms:description>Comprehensive guide to Modular programming</dcterms:description>
+    <nav:link rdf:resource="https://openlibrary.org/search?q=Modular%20programming"/>
+  </nav:Book>
+  <nav:Article rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-modular-programming">
+    <rdfs:label>Введение в Modular programming</rdfs:label>
+    <dcterms:description>Обзорная статья про Modular programming для начинающих</dcterms:description>
+    <nav:link rdf:resource="https://habr.com/ru/search/?q=Modular%20programming"/>
+    <nav:rating rdf:datatype="http://www.w3.org/2001/XMLSchema#double">42</nav:rating>
+    <nav:tag>modular programming</nav:tag>
+    <nav:tag>tutorial</nav:tag>
+  </nav:Article>
+  <nav:Course rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-version-control">
+    <rdfs:label>Version control — полный курс</rdfs:label>
+    <dcterms:description>Изучите Version control с нуля до профессионального уровня</dcterms:description>
+    <nav:link rdf:resource="https://stepik.org/search?q=Version%20control"/>
+    <nav:minHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">10</nav:minHours>
+    <nav:avgHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:avgHours>
+    <nav:maxHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">40</nav:maxHours>
+    <nav:coursesAnalyzed rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</nav:coursesAnalyzed>
+  </nav:Course>
+  <nav:Book rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-version-control">
+    <rdfs:label>Mastering Version control</rdfs:label>
+    <dcterms:creator>Mock Author</dcterms:creator>
+    <dcterms:description>Comprehensive guide to Version control</dcterms:description>
+    <nav:link rdf:resource="https://openlibrary.org/search?q=Version%20control"/>
+  </nav:Book>
+  <nav:Article rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-version-control">
+    <rdfs:label>Введение в Version control</rdfs:label>
+    <dcterms:description>Обзорная статья про Version control для начинающих</dcterms:description>
+    <nav:link rdf:resource="https://habr.com/ru/search/?q=Version%20control"/>
+    <nav:rating rdf:datatype="http://www.w3.org/2001/XMLSchema#double">42</nav:rating>
+    <nav:tag>version control</nav:tag>
+    <nav:tag>tutorial</nav:tag>
+  </nav:Article>
+  <nav:Course rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/courses/course-software-testing">
+    <rdfs:label>Software testing — полный курс</rdfs:label>
+    <dcterms:description>Изучите Software testing с нуля до профессионального уровня</dcterms:description>
+    <nav:link rdf:resource="https://stepik.org/search?q=Software%20testing"/>
+    <nav:minHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">10</nav:minHours>
+    <nav:avgHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</nav:avgHours>
+    <nav:maxHours rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">40</nav:maxHours>
+    <nav:coursesAnalyzed rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</nav:coursesAnalyzed>
+  </nav:Course>
+  <nav:Book rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/books/book-software-testing">
+    <rdfs:label>Mastering Software testing</rdfs:label>
+    <dcterms:creator>Mock Author</dcterms:creator>
+    <dcterms:description>Comprehensive guide to Software testing</dcterms:description>
+    <nav:link rdf:resource="https://openlibrary.org/search?q=Software%20testing"/>
+  </nav:Book>
+  <nav:Article rdf:about="https://mse1h2026-navigator.local/graphs/69f9007fd3e8287504d9afde/articles/article-software-testing">
+    <rdfs:label>Введение в Software testing</rdfs:label>
+    <dcterms:description>Обзорная статья про Software testing для начинающих</dcterms:description>
+    <nav:link rdf:resource="https://habr.com/ru/search/?q=Software%20testing"/>
+    <nav:rating rdf:datatype="http://www.w3.org/2001/XMLSchema#double">42</nav:rating>
+    <nav:tag>software testing</nav:tag>
+    <nav:tag>tutorial</nav:tag>
+  </nav:Article>
+</rdf:RDF>
