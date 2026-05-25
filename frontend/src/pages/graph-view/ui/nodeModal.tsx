@@ -20,7 +20,11 @@ import {
 
 type NodeModalData = Partial<Skill & MainSkill>;
 
-export const NodeModal = observer(() => {
+interface NodeModalProps {
+  onSubgraphShown?: (params: { nodeId: string; depth: number }) => void;
+}
+
+export const NodeModal = observer(({ onSubgraphShown }: NodeModalProps) => {
   const nodeModalStore = useNodeModalStore();
   const graphStore = useGraphStore();
   const selectedNode = nodeModalStore.selectedNode;
@@ -92,9 +96,19 @@ export const NodeModal = observer(() => {
       return;
     }
 
+    const nodeId = selectedNode.id;
+    const depth = subgraphDepth;
+
     void graphStore
-      .showSubgraph(selectedNode.id, subgraphDepth)
-      .then(() => nodeModalStore.close());
+      .showSubgraph(nodeId, depth)
+      .then(() => {
+        const hasError = Boolean(graphStore.error);
+        nodeModalStore.close();
+
+        if (!hasError) {
+          onSubgraphShown?.({ nodeId, depth });
+        }
+      });
   };
 
   return (
